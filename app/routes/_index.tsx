@@ -1,30 +1,41 @@
-import type { MetaFunction } from '@vercel/remix';
+import { Form, useLoaderData } from '@remix-run/react';
+import type { ActionFunctionArgs, MetaFunction } from '@vercel/remix';
+import db from '~/db';
+import { expenses } from '~/db/schema';
 
 export const meta: MetaFunction = () => {
 	return [{ title: 'New Remix App' }, { name: 'description', content: 'Welcome to Remix!' }];
 };
 
+export async function loader() {
+	return db.select().from(expenses);
+}
+
+export async function action({ request }: ActionFunctionArgs) {
+	const form = await request.formData();
+
+	const description = String(form.get('description') ?? '');
+	const amount = Number(form.get('amount') ?? 0);
+
+	await db
+		.insert(expenses)
+		.values({ description, amount: String(amount) })
+		.execute();
+
+	return null;
+}
+
 export default function Index() {
+	const expenses = useLoaderData<typeof loader>();
+
 	return (
-		<div className='bg-blue-700' style={{ fontFamily: 'system-ui, sans-serif', lineHeight: '1.8' }}>
-			<h1>Welcome to Remix</h1>
-			<ul>
-				<li>
-					<a target='_blank' href='https://remix.run/tutorials/blog' rel='noreferrer'>
-						15m Quickstart Blog Tutorial
-					</a>
-				</li>
-				<li>
-					<a target='_blank' href='https://remix.run/tutorials/jokes' rel='noreferrer'>
-						Deep Dive Jokes App Tutorial
-					</a>
-				</li>
-				<li>
-					<a target='_blank' href='https://remix.run/docs' rel='noreferrer'>
-						Remix Docs
-					</a>
-				</li>
-			</ul>
+		<div>
+			<div>{JSON.stringify(expenses, null, 2)}</div>
+			<Form method='post'>
+				<input type='text' name='description' placeholder='Description' />
+				<input type='number' required name='amount' placeholder='Amount' />
+				<button>Submit</button>
+			</Form>
 		</div>
 	);
 }
