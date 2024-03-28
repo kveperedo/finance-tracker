@@ -7,7 +7,8 @@
 		"build": "remix vite:build",
 		"dev": "remix vite:dev",
 		"typecheck": "tsc",
-		"generate": "drizzle-kit generate:pg"
+		"generate": "drizzle-kit generate:pg",
+		"studio": "drizzle-kit studio"
 	},
 	"dependencies": {
 		"@neondatabase/serverless": "^0.9.0",
@@ -31,6 +32,7 @@
 		"autoprefixer": "^10.4.19",
 		"drizzle-kit": "^0.20.14",
 		"eslint": "^8.38.0",
+		"pg": "^8.11.3",
 		"postcss": "^8.4.38",
 		"tailwindcss": "^3.4.3",
 		"typescript": "^5.1.6",
