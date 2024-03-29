@@ -10,6 +10,9 @@ import type { LinksFunction } from '@vercel/remix';
 import stylesheet from '~/tailwind.css?url';
 
 import '@fontsource/zilla-slab';
+import '@fontsource-variable/source-code-pro';
+
+import Header from './components/header';
 
 export const links: LinksFunction = () => [
     { rel: 'stylesheet', href: stylesheet },
@@ -17,7 +20,7 @@ export const links: LinksFunction = () => [
 
 export function Layout({ children }: { children: React.ReactNode }) {
     return (
-        <html className="bg-gray-900 font-serif text-white" lang="en">
+        <html className="font-serif" lang="en">
             <head>
                 <meta charSet="utf-8" />
                 <meta
@@ -27,7 +30,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 <Meta />
                 <Links />
             </head>
-            <body className="h-screen">
+            <body className="flex h-screen flex-col overflow-hidden">
                 {children}
                 <ScrollRestoration />
                 <Scripts />
@@ -38,5 +41,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-    return <Outlet />;
+    return (
+        <>
+            <Header />
+            <Outlet />
+        </>
+    );
 }

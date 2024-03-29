@@ -1,8 +1,7 @@
-import { numeric, pgTable, serial, text, timestamp } from 'drizzle-orm/pg-core';
-import type { InferSelectModel } from 'drizzle-orm';
+import { numeric, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 
 export const expenses = pgTable('expenses', {
-    id: serial('id').primaryKey(),
+    id: uuid('id').defaultRandom().primaryKey(),
     description: text('description').notNull(),
     amount: numeric('amount', { precision: 10, scale: 2 }).notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
@@ -10,5 +9,3 @@ export const expenses = pgTable('expenses', {
         .notNull()
         .$onUpdateFn(() => new Date()),
 });
-
-export type Expense = InferSelectModel<typeof expenses>;
