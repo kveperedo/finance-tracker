@@ -9,14 +9,14 @@ const sql = neon(envServerSchema.DATABASE_URL);
 const db = drizzle(sql);
 
 const main = async () => {
-	console.log('Migrating database...');
+    console.log('Migrating database...');
 
-	try {
-		await migrate(db, { migrationsFolder: 'migrations' });
-		console.log('Migration completed');
-	} catch (error) {
-		console.error('Error during migration:', error);
-		process.exit(1);
-	}
+    try {
+        await migrate(db, { migrationsFolder: 'migrations' });
+        console.log('Migration completed');
+    } catch (error) {
+        console.error('Error during migration:', error);
+        process.exit(1);
+    }
 };
 main();
