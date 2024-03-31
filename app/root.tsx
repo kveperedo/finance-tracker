@@ -12,8 +12,6 @@ import stylesheet from '~/tailwind.css?url';
 import '@fontsource/zilla-slab';
 import '@fontsource-variable/source-code-pro';
 
-import Header from './components/header';
-
 export const links: LinksFunction = () => [
     { rel: 'stylesheet', href: stylesheet },
 ];
@@ -41,10 +39,5 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-    return (
-        <>
-            <Header />
-            <Outlet />
-        </>
-    );
+    return <Outlet />;
 }

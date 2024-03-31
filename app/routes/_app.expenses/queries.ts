@@ -1,18 +1,18 @@
-import { desc, gte, sum } from 'drizzle-orm';
+import { and, desc, eq, gte, sum } from 'drizzle-orm';
 import db from '~/db';
 import { expenses } from '~/db/schema';
 import { startOfMonth } from 'date-fns';
 import type { AddExpenseInput } from './schema';
 
-export function getExpenses() {
+export function getExpenses(userId: string) {
     return db
         .select()
         .from(expenses)
-        .where(gte(expenses.createdAt, startOfMonth(new Date())))
+        .where(and(gte(expenses.createdAt, startOfMonth(new Date())), eq(expenses.userId, userId)))
         .orderBy(desc(expenses.createdAt));
 }
 
-export async function getMonthlyExpenses() {
+export async function getMonthlyExpenses(userId: string) {
     const startOfMonthDate = startOfMonth(new Date());
 
     const [result] = await db
@@ -20,7 +20,7 @@ export async function getMonthlyExpenses() {
             total: sum(expenses.amount),
         })
         .from(expenses)
-        .where(gte(expenses.createdAt, startOfMonthDate));
+        .where(and(gte(expenses.createdAt, startOfMonthDate), eq(expenses.userId, userId)));
 
     if (!result) {
         return 0;
@@ -33,10 +33,11 @@ export async function addExpense({
     amount,
     description,
     id,
-}: AddExpenseInput & { id: string }) {
+    userId,
+}: AddExpenseInput & { id: string; userId: string }) {
     const result = await db
         .insert(expenses)
-        .values({ id, description, amount: String(amount) })
+        .values({ id, description, amount: String(amount), userId })
         .returning();
 
     return result[0];

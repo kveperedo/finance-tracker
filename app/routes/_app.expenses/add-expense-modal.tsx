@@ -1,35 +1,26 @@
 import { ListPlus, X } from 'lucide-react';
-import {
-    Dialog,
-    DialogTrigger,
-    Heading,
-    Modal,
-    ModalOverlay,
-} from 'react-aria-components';
-import { cn } from '~/utils';
-import { Controller, useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { Dialog, DialogTrigger, Heading, Modal, ModalOverlay } from 'react-aria-components';
+import { Controller } from 'react-hook-form';
 import TextField from '~/components/text-field';
 import { useEffect, useState } from 'react';
 import Button from '~/components/button';
 import NumberField from '~/components/number-field';
 import type { AddExpenseInput } from './schema';
-import { addExpenseSchema } from './schema';
+import type { useRemixForm } from 'remix-hook-form';
+import { cn } from '~/utils';
 
 type AddExpenseModalProps = {
-    onSubmit: (data: AddExpenseInput) => void;
+    formMethods: ReturnType<typeof useRemixForm<AddExpenseInput>>;
 };
 
-export default function AddExpenseModal({ onSubmit }: AddExpenseModalProps) {
+export default function AddExpenseModal({ formMethods }: AddExpenseModalProps) {
     const [isOpen, setIsOpen] = useState(false);
-
-    const { control, handleSubmit, reset } = useForm<AddExpenseInput>({
-        resolver: zodResolver(addExpenseSchema),
-        defaultValues: {
-            description: '',
-            amount: 0,
-        },
-    });
+    const {
+        reset,
+        handleSubmit,
+        control,
+        formState: { isValid },
+    } = formMethods;
 
     useEffect(
         function resetFormOnUnmount() {
@@ -60,58 +51,50 @@ export default function AddExpenseModal({ onSubmit }: AddExpenseModalProps) {
                                 Add Expenses
                             </Heading>
 
-                            <Button
-                                className="border-0 p-1 "
-                                onPress={() => setIsOpen(false)}>
+                            <Button className="border-0 p-1" onPress={() => setIsOpen(false)}>
                                 <X />
                             </Button>
                         </div>
 
                         <form
                             className="p-4"
-                            onSubmit={handleSubmit((data) => {
-                                setIsOpen(false);
-                                onSubmit(data);
-                            })}>
+                            onSubmit={(event) => {
+                                if (isValid) {
+                                    setIsOpen(false);
+                                }
+                                handleSubmit(event);
+                            }}>
                             <div className="flex flex-col gap-4 py-2">
                                 <Controller
                                     control={control}
-                                    name="description"
-                                    render={({
-                                        field,
-                                        fieldState: { error },
-                                    }) => (
-                                        <TextField
-                                            autoFocus
-                                            label="Description"
-                                            {...field}
-                                            isInvalid={!!error?.message}
-                                            errorMessage={error?.message}
-                                        />
-                                    )}
-                                />
-
-                                <Controller
-                                    control={control}
                                     name="amount"
-                                    render={({
-                                        field,
-                                        fieldState: { error },
-                                    }) => {
+                                    render={({ field, fieldState: { error } }) => {
                                         return (
                                             <NumberField
+                                                autoFocus
                                                 label="Amount"
                                                 {...field}
                                                 onChange={(value) => {
-                                                    field.onChange(
-                                                        isNaN(value) ? 0 : value
-                                                    );
+                                                    field.onChange(isNaN(value) ? 0 : value);
                                                 }}
                                                 isInvalid={!!error?.message}
                                                 errorMessage={error?.message}
                                             />
                                         );
                                     }}
+                                />
+
+                                <Controller
+                                    control={control}
+                                    name="description"
+                                    render={({ field, fieldState: { error } }) => (
+                                        <TextField
+                                            label="Description"
+                                            {...field}
+                                            isInvalid={!!error?.message}
+                                            errorMessage={error?.message}
+                                        />
+                                    )}
                                 />
                             </div>
 
@@ -123,10 +106,7 @@ export default function AddExpenseModal({ onSubmit }: AddExpenseModalProps) {
                                     onPress={() => setIsOpen(false)}>
                                     Cancel
                                 </Button>
-                                <Button
-                                    type="submit"
-                                    className="w-full"
-                                    color="purple">
+                                <Button type="submit" className="w-full" color="purple">
                                     Submit
                                 </Button>
                             </div>
