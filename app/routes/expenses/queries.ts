@@ -15,14 +15,18 @@ export function getExpenses() {
 export async function getMonthlyExpenses() {
     const startOfMonthDate = startOfMonth(new Date());
 
-    const result = await db
+    const [result] = await db
         .select({
             total: sum(expenses.amount),
         })
         .from(expenses)
         .where(gte(expenses.createdAt, startOfMonthDate));
 
-    return result[0].total ? parseFloat(result[0].total) : 0;
+    if (!result) {
+        return 0;
+    }
+
+    return result.total ? parseFloat(result.total) : 0;
 }
 
 export async function addExpense({
