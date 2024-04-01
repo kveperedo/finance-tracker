@@ -10,7 +10,8 @@ export const loginSchema = createSelectSchema(users, {
         .email({
             message: 'Invalid email address',
         })
-        .toLowerCase(),
+        .toLowerCase()
+        .trim(),
     passwordHash: z.string({
         required_error: 'Password is required',
     }),
