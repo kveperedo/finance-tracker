@@ -9,7 +9,8 @@ export const registerSchema = createSelectSchema(users, {
         })
         .email({
             message: 'Invalid email address',
-        }),
+        })
+        .toLowerCase(),
     passwordHash: z
         .string({
             required_error: 'Password is required',
