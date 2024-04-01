@@ -1,6 +1,8 @@
 import { z } from 'zod';
+import { createInsertSchema } from 'drizzle-zod';
+import { expenses } from '~/db/schema';
 
-export const addExpenseSchema = z.object({
+export const addExpenseSchema = createInsertSchema(expenses, {
     description: z
         .string({
             required_error: 'Description is required',
@@ -11,6 +13,9 @@ export const addExpenseSchema = z.object({
             required_error: 'Amount is required',
         })
         .min(0.01, { message: 'Amount should be greater than 0' }),
+}).pick({
+    description: true,
+    amount: true,
 });
 
 export type AddExpenseInput = z.infer<typeof addExpenseSchema>;

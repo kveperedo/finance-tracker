@@ -1,4 +1,4 @@
-import { redirect } from '@remix-run/server-runtime';
+import { redirect } from '@vercel/remix';
 
 export function loader() {
     return redirect('/expenses');

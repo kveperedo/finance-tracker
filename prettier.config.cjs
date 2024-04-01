@@ -8,4 +8,5 @@ module.exports = {
     tailwindConfig: './tailwind.config.ts',
     pluginSearchDirs: false,
     bracketSameLine: true,
+    printWidth: 120,
 };

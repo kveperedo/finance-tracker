@@ -1,3 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+* {
+    @apply focus:outline-offset-4 focus:outline-black data-[focused]:outline-offset-4 data-[focused]:outline-black;
+}
