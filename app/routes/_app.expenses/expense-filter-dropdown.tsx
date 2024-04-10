@@ -25,11 +25,12 @@ export default function ExpenseFilterDropdown() {
                 ref={triggerRef}
                 onPress={() => setIsPopoverOpen(true)}
                 variant="outline"
-                rightIcon={<ChevronsUpDown size={16} />}>
+                rightIcon={<ChevronsUpDown size={16} />}
+            >
                 {MONTHS[currentMonth as MonthKey]} {currentYear}
             </Button>
             <Popover triggerRef={triggerRef} isOpen={isPopoverOpen} onOpenChange={setIsPopoverOpen} showArrow>
-                <Dialog className="w-72 p-4 outline-none">
+                <Dialog aria-label="Expense filter dropdown" className="w-72 p-4 outline-none">
                     <div className="flex items-center gap-4">
                         <Select
                             name="month"
@@ -43,7 +44,8 @@ export default function ExpenseFilterDropdown() {
                                     searchParams.set('month', String(key));
                                     return searchParams;
                                 });
-                            }}>
+                            }}
+                        >
                             {Object.entries(MONTHS).map(([key, value]) => (
                                 <ListBoxItem key={key} id={Number(key)}>
                                     {value}
@@ -61,7 +63,8 @@ export default function ExpenseFilterDropdown() {
                                     searchParams.set('year', String(key));
                                     return searchParams;
                                 });
-                            }}>
+                            }}
+                        >
                             {YEARS.map((year) => (
                                 <ListBoxItem key={year} id={Number(year)}>
                                     {year}
@@ -80,7 +83,8 @@ export default function ExpenseFilterDropdown() {
                             });
                         }}
                         variant="secondary"
-                        className="mt-4 w-full">
+                        className="mt-4 w-full"
+                    >
                         Reset filters
                     </Button>
                 </Dialog>
