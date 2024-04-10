@@ -11,7 +11,7 @@ import { createUserSession, getUser, login } from '~/auth/session.server';
 import { useRemixForm, getValidatedFormData } from 'remix-hook-form';
 import { Form, Link, useActionData, useNavigation } from '@remix-run/react';
 import { useEffect, useState } from 'react';
-import AuthPanelContainer from '~/components/auth-panel-container';
+import ModalContainer from '~/components/modal-container';
 
 type ServerError = { errorType: 'invalidCredentials' };
 const isServerError = (actionData: SerializeFrom<typeof action>): actionData is ServerError => {
@@ -83,8 +83,8 @@ export default function LoginPage() {
 
     return (
         <main className="flex h-full items-center justify-center bg-stone-100">
-            <AuthPanelContainer header="Login">
-                <Form onSubmit={handleSubmit} className="flex flex-col gap-4 p-4 pt-8">
+            <ModalContainer header="Login">
+                <Form onSubmit={handleSubmit} className="flex flex-col gap-4">
                     <Controller
                         control={control}
                         name="email"
@@ -118,21 +118,19 @@ export default function LoginPage() {
                     <Button
                         isDisabled={isSubmitting}
                         type="submit"
-                        color="purple"
                         className="mt-4"
-                        leftIcon={isSubmitting && <Loader className="animate-spin" size={20} />}>
-                        {isSubmitting ? 'Logging in...' : 'Log In'}
+                        leftIcon={isSubmitting && <Loader className="animate-spin" size={16} />}>
+                        {isSubmitting ? 'Logging in...' : 'Login'}
                     </Button>
                 </Form>
 
-                <p className="px-4 pb-4 text-sm text-stone-600">
-                    Don't have an account?
-                    <Link prefetch="intent" to="/register" className=" text-blue-600">
-                        {' '}
+                <p className="pt-4 text-sm text-stone-500">
+                    Don't have an account?{' '}
+                    <Link prefetch="intent" to="/register" className="text-stone-700 underline">
                         Sign up
                     </Link>
                 </p>
-            </AuthPanelContainer>
+            </ModalContainer>
         </main>
     );
 }

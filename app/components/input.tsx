@@ -1,19 +1,22 @@
 import { forwardRef } from 'react';
 import type { InputProps as AriaInputProps } from 'react-aria-components';
-import { Input as AriaInput } from 'react-aria-components';
-import { cn } from '~/utils';
+import { Input as AriaInput, composeRenderProps } from 'react-aria-components';
+import { tv } from 'tailwind-variants';
+import { focusRing } from '~/utils';
+
+export const inputStyles = tv({
+    extend: focusRing,
+    base: 'h-10 w-full rounded border border-stone-300 px-4 py-2 text-sm text-stone-800 shadow-sm transition-colors placeholder:text-stone-400 invalid:border-red-600 hover:bg-stone-50 focus:bg-stone-50 hover:[&:not([data-invalid])]:border-stone-400 focus:[&:not([data-invalid])]:border-stone-400',
+});
 
 const Input = forwardRef<HTMLInputElement, AriaInputProps>((props, ref) => {
     return (
         <AriaInput
             ref={ref}
             {...props}
-            className={(state) =>
-                cn(
-                    'h-10 w-full border border-black bg-stone-100 px-4 py-2 transition-colors placeholder:text-stone-400 data-[invalid]:border-red-600 data-[hovered]:bg-stone-50',
-                    typeof props.className === 'function' ? props.className(state) : props.className
-                )
-            }
+            className={composeRenderProps(props.className, (className, renderProps) =>
+                inputStyles({ ...renderProps, className })
+            )}
         />
     );
 });
