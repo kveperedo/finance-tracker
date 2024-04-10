@@ -4,7 +4,7 @@ import type { ExpenseParams } from './queries';
 import { addExpense, getExpenses, getMonthlyExpenses } from './queries';
 import { format } from 'date-fns';
 import AddExpenseModal from './add-expense-modal';
-import type { ActionFunctionArgs, LoaderFunctionArgs } from '@vercel/remix';
+import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from '@vercel/remix';
 import type { AddExpenseInput } from './schema';
 import { addExpenseSchema } from './schema';
 import type { Expense } from '~/db/types';
@@ -17,6 +17,22 @@ import { generateFormData } from '~/lib/remix-hook-form';
 import { cn, numberFormatter } from '~/utils';
 import ExpenseFilterDropdown from './expense-filter-dropdown';
 import { useEffect, useRef } from 'react';
+import type { MonthKey } from './constants';
+import { MONTHS } from './constants';
+
+export const meta: MetaFunction = ({ location }) => {
+    const searchParams = new URLSearchParams(location.search);
+    const month = searchParams.get('month') ?? new Date().getMonth() + 1;
+    const year = searchParams.get('year') ?? new Date().getFullYear();
+
+    return [
+        { title: `${MONTHS[month as MonthKey]} ${year} Expenses` },
+        {
+            name: 'description',
+            content: `Expenses for ${MONTHS[month as MonthKey]} ${year}`,
+        },
+    ];
+};
 
 const addExpenseSchemaWithId = addExpenseSchema.extend({
     id: z.string().uuid(),

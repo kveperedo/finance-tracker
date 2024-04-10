@@ -9,7 +9,7 @@ import TextField from '~/components/text-field';
 import Button from '~/components/button';
 import { Link, useActionData, useNavigation } from '@remix-run/react';
 import { Loader } from 'lucide-react';
-import type { ActionFunctionArgs, SerializeFrom } from '@vercel/remix';
+import type { ActionFunctionArgs, MetaFunction, SerializeFrom } from '@vercel/remix';
 import { json } from '@vercel/remix';
 import db from '~/db';
 import { users } from '~/db/schema';
@@ -20,6 +20,16 @@ import { useEffect, useState } from 'react';
 type ServerError = { errorType: 'accountExists' | 'unknownError' };
 const isServerError = (actionData: SerializeFrom<typeof action>): actionData is ServerError => {
     return Boolean((actionData as any).errorType);
+};
+
+export const meta: MetaFunction = () => {
+    return [
+        { title: 'Register' },
+        {
+            name: 'description',
+            content: 'Register for an account',
+        },
+    ];
 };
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -130,7 +140,8 @@ export default function RegisterPage() {
                         isDisabled={isSubmitting}
                         type="submit"
                         className="mt-4"
-                        leftIcon={isSubmitting && <Loader className="animate-spin" size={20} />}>
+                        leftIcon={isSubmitting && <Loader className="animate-spin" size={20} />}
+                    >
                         {isSubmitting ? 'Registering account...' : 'Register account'}
                     </Button>
                 </Form>
