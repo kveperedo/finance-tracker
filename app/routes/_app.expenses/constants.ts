@@ -17,5 +17,5 @@ export type MonthKey = keyof typeof MONTHS;
 
 export const generateYears = () => {
     const currentYear = new Date().getFullYear();
-    return Array.from({ length: 10 }, (_, i) => currentYear - i);
+    return Array.from({ length: 10 }, (_, i) => currentYear - i).map(String);
 };
