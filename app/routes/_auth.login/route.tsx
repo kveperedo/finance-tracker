@@ -6,7 +6,7 @@ import type { LoginInput } from './schema';
 import { loginSchema } from './schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { json, redirect } from '@vercel/remix';
-import type { SerializeFrom, ActionFunctionArgs } from '@vercel/remix';
+import type { SerializeFrom, ActionFunctionArgs, MetaFunction } from '@vercel/remix';
 import { createUserSession, getUser, login } from '~/auth/session.server';
 import { useRemixForm, getValidatedFormData } from 'remix-hook-form';
 import { Form, Link, useActionData, useNavigation } from '@remix-run/react';
@@ -16,6 +16,16 @@ import ModalContainer from '~/components/modal-container';
 type ServerError = { errorType: 'invalidCredentials' };
 const isServerError = (actionData: SerializeFrom<typeof action>): actionData is ServerError => {
     return Boolean((actionData as any).errorType);
+};
+
+export const meta: MetaFunction = () => {
+    return [
+        { title: 'Login' },
+        {
+            name: 'description',
+            content: 'Login to your account',
+        },
+    ];
 };
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -119,7 +129,8 @@ export default function LoginPage() {
                         isDisabled={isSubmitting}
                         type="submit"
                         className="mt-4"
-                        leftIcon={isSubmitting && <Loader className="animate-spin" size={16} />}>
+                        leftIcon={isSubmitting && <Loader className="animate-spin" size={16} />}
+                    >
                         {isSubmitting ? 'Logging in...' : 'Login'}
                     </Button>
                 </Form>

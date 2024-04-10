@@ -2,7 +2,7 @@
 import { Dialog } from 'react-aria-components';
 import type { MonthKey } from './constants';
 import { MONTHS, generateYears } from './constants';
-import { ChevronsUpDown } from 'lucide-react';
+import { ChevronsUpDown, FilterX } from 'lucide-react';
 import Popover from '~/components/popover';
 import { ListBoxItem } from '~/components/item';
 import { useSearchParams } from '@remix-run/react';
@@ -84,8 +84,9 @@ export default function ExpenseFilterDropdown() {
                         }}
                         variant="secondary"
                         className="mt-4 w-full"
+                        leftIcon={<FilterX size={16} />}
                     >
-                        Reset filters
+                        Clear filters
                     </Button>
                 </Dialog>
             </Popover>
