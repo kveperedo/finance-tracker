@@ -3,7 +3,7 @@ import { tv } from 'tailwind-variants';
 
 export const modalContainerStyles = tv({
     slots: {
-        base: 'w-full rounded-lg border border-stone-300 bg-white shadow-md sm:w-96',
+        base: 'm-4 w-full rounded-lg border border-stone-300 bg-white shadow-md sm:w-96',
         header: 'flex items-center justify-between border-b border-stone-300 p-4',
         headerText: 'text-lg font-bold text-stone-700',
         body: 'p-8',
