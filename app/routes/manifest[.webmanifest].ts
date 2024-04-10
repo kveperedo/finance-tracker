@@ -8,8 +8,8 @@ export const loader = () => {
             name: 'KP Finance Tracker',
             start_url: '/',
             display: 'standalone',
-            background_color: '#d3d7dd',
-            theme_color: '#c34138',
+            background_color: '#ffffff',
+            theme_color: '#1c1917',
             icons: [
                 {
                     src: '/logo.png',
