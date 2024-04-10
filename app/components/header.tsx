@@ -1,23 +1,30 @@
 import { NavLink, useSubmit } from '@remix-run/react';
-import { Button, Menu, MenuItem, MenuTrigger, Popover } from 'react-aria-components';
+import { Menu, MenuTrigger } from 'react-aria-components';
 import { LogOut, Menu as MenuIcon } from 'lucide-react';
 import { cn } from '~/utils';
+import Popover from './popover';
+import Button from './button';
+import { MenuItem } from './item';
 
 export default function Header() {
     const submit = useSubmit();
 
     return (
-        <header className="bg-black px-4 py-4 text-white">
+        <header className="border-b border-stone-200 bg-stone-50 px-4 py-3 text-stone-800">
             <div className="container mx-auto flex items-center justify-between">
                 <div className="flex gap-4">
                     <NavLink
-                        className={({ isActive }) => cn(isActive && 'text-lime-400 underline')}
+                        className={({ isActive }) =>
+                            cn('text-sm text-stone-500', isActive && 'font-semibold text-stone-800')
+                        }
                         to="/expenses"
                         prefetch="intent">
                         Expenses
                     </NavLink>
                     <NavLink
-                        className={({ isActive }) => cn(isActive && 'text-lime-400 underline')}
+                        className={({ isActive }) =>
+                            cn('text-sm text-stone-500', isActive && 'font-semibold text-stone-800')
+                        }
                         to="/investments"
                         prefetch="intent">
                         Investments
@@ -25,28 +32,18 @@ export default function Header() {
                 </div>
 
                 <MenuTrigger>
-                    <Button className="p-1 transition-colors data-[hovered]:bg-stone-900">
+                    <Button variant="tertiary" size="icon-sm">
                         <MenuIcon size={20} />
                     </Button>
-                    <Popover
-                        className={({ isEntering, isExiting }) =>
-                            cn(
-                                'w-40 border border-black bg-white ring-1 ring-black/10 drop-shadow-lg',
-                                isEntering && 'duration-200 ease-out animate-in fade-in',
-                                isExiting && 'duration-150 ease-in animate-out fade-out'
-                            )
-                        }
-                        placement="bottom end">
+                    <Popover className="w-40" placement="bottom end">
                         <Menu
-                            autoFocus="first"
+                            className="p-2 text-sm outline-none"
                             onAction={(id) => {
                                 if (id === 'logout') {
                                     submit(null, { method: 'post', action: '/logout' });
                                 }
                             }}>
-                            <MenuItem
-                                className="flex cursor-pointer items-center p-2 transition-colors data-[hovered]:bg-stone-100"
-                                id="logout">
+                            <MenuItem id="logout">
                                 <LogOut className="mr-2" size={20} />
                                 Logout
                             </MenuItem>

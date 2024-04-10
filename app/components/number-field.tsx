@@ -1,8 +1,9 @@
 import { forwardRef } from 'react';
 import type { NumberFieldProps as AriaNumberFieldProps } from 'react-aria-components';
-import { NumberField as AriaNumberField, FieldError, Label, Text } from 'react-aria-components';
+import { NumberField as AriaNumberField, FieldError, Text } from 'react-aria-components';
 import Input from './input';
 import { cn } from '~/utils';
+import Label from './label';
 
 type NumberFieldProps = AriaNumberFieldProps & {
     label?: string;
@@ -14,10 +15,10 @@ export const NumberField = forwardRef<HTMLInputElement, NumberFieldProps>(
     ({ label, description, errorMessage, ...props }, ref) => {
         return (
             <AriaNumberField {...props} className={cn('flex flex-col items-start', props.className)}>
-                <Label className="mb-1">{label}</Label>
+                <Label>{label}</Label>
                 <Input ref={ref} className="font-mono text-sm" />
                 {description && <Text slot="description">{description}</Text>}
-                <FieldError className="mt-1 text-sm text-red-600">{errorMessage}</FieldError>
+                <FieldError className="mt-1 text-xs text-red-600">{errorMessage}</FieldError>
             </AriaNumberField>
         );
     }

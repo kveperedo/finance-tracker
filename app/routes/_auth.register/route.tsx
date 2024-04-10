@@ -1,6 +1,6 @@
 import { Form } from 'react-aria-components';
 import { getValidatedFormData, useRemixForm } from 'remix-hook-form';
-import AuthPanelContainer from '~/components/auth-panel-container';
+import ModalContainer from '~/components/modal-container';
 import type { RegisterInput } from './schema';
 import { registerSchema } from './schema';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -81,8 +81,8 @@ export default function RegisterPage() {
 
     return (
         <main className="flex h-full items-center justify-center bg-stone-100">
-            <AuthPanelContainer header="Register">
-                <Form onSubmit={handleSubmit} className="flex flex-col gap-4 p-4 pt-8">
+            <ModalContainer header="Register">
+                <Form onSubmit={handleSubmit} className="flex flex-col gap-4">
                     <Controller
                         control={control}
                         name="email"
@@ -129,21 +129,19 @@ export default function RegisterPage() {
                     <Button
                         isDisabled={isSubmitting}
                         type="submit"
-                        color="purple"
                         className="mt-4"
                         leftIcon={isSubmitting && <Loader className="animate-spin" size={20} />}>
                         {isSubmitting ? 'Registering account...' : 'Register account'}
                     </Button>
                 </Form>
 
-                <p className="px-4 pb-4 text-sm text-stone-600">
-                    Already have an account?
-                    <Link prefetch="intent" to="/login" className=" text-blue-600">
-                        {' '}
+                <p className="pt-4 text-sm text-stone-500">
+                    Already have an account?{' '}
+                    <Link prefetch="intent" to="/login" className="text-stone-700 underline">
                         Login
                     </Link>
                 </p>
-            </AuthPanelContainer>
+            </ModalContainer>
         </main>
     );
 }

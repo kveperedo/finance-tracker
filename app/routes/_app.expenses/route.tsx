@@ -1,5 +1,6 @@
 import { useFetcher, useLoaderData } from '@remix-run/react';
 import { json, redirect } from '@vercel/remix';
+import type { ExpenseParams } from './queries';
 import { addExpense, getExpenses, getMonthlyExpenses } from './queries';
 import { format } from 'date-fns';
 import AddExpenseModal from './add-expense-modal';
@@ -14,6 +15,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { getUserId } from '~/auth/session.server';
 import { generateFormData } from '~/lib/remix-hook-form';
 import { cn, numberFormatter } from '~/utils';
+import ExpenseFilterDropdown from './expense-filter-dropdown';
+import { useEffect, useRef } from 'react';
 
 const addExpenseSchemaWithId = addExpenseSchema.extend({
     id: z.string().uuid(),
@@ -51,13 +54,24 @@ export async function loader({ request }: LoaderFunctionArgs) {
         return redirect('/login');
     }
 
-    const [expenses, monthlyExpenses] = await Promise.all([getExpenses(userId), getMonthlyExpenses(userId)]);
+    const searchParams = new URL(request.url).searchParams;
+    const month = searchParams.get('month');
+    const year = searchParams.get('year');
+
+    const params: ExpenseParams = {
+        userId,
+        month: month ? Number(month) : undefined,
+        year: year ? Number(year) : undefined,
+    };
+
+    const [expenses, monthlyExpenses] = await Promise.all([getExpenses(params), getMonthlyExpenses(params)]);
 
     return { expenses, monthlyExpenses };
 }
 
 export default function ExpensesPage() {
     const { expenses, monthlyExpenses } = useLoaderData<typeof loader>();
+    const tableRef = useRef<HTMLDivElement>(null);
     const fetcher = useFetcher<typeof action>();
     const formMethods = useRemixForm<AddExpenseInput>({
         resolver: zodResolver(addExpenseSchema),
@@ -70,14 +84,19 @@ export default function ExpensesPage() {
         },
         fetcher,
     });
+    const {
+        formState: { isSubmitting, isSubmitted },
+    } = formMethods;
+
+    useEffect(() => {
+        if (isSubmitted) {
+            tableRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }, [isSubmitting, isSubmitted]);
 
     const pendingExpense = fetcher.formData
         ? (generateFormData(fetcher.formData) as AddExpenseInput & { id: string })
         : null;
-
-    if (pendingExpense) {
-        console.log(pendingExpense);
-    }
 
     const totalMonthlyExpenses = monthlyExpenses + (pendingExpense?.amount ?? 0);
     const expensesToDisplay = pendingExpense
@@ -93,32 +112,26 @@ export default function ExpensesPage() {
         : expenses;
 
     return (
-        <main className="container m-auto mx-auto flex w-full flex-1 flex-col overflow-hidden border-x-0 border-black sm:border-x">
-            <div className="flex items-center justify-between border-b border-black p-4">
-                <div>
-                    <p className="text-left">Monthly Expenses</p>
-                    <p className="font-mono text-2xl font-bold">
-                        <span className="font-serif text-lg font-extralight">PHP </span>
-                        {numberFormatter.format(totalMonthlyExpenses)}
-                    </p>
-                </div>
+        <main className="container m-auto mx-auto flex w-full flex-1 flex-col overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-4 sm:px-0">
+                <ExpenseFilterDropdown />
                 <AddExpenseModal formMethods={formMethods} />
             </div>
 
-            <div className="flex justify-between border-b border-black bg-stone-100 p-2 font-bold">
-                <span className="flex-1 text-sm font-light">Description</span>
-                <span className="basis-[100px] text-sm font-light">Date</span>
-                <span className="basis-[100px] text-right text-sm font-light">Amount</span>
+            <div className="flex justify-between rounded bg-stone-100 p-2">
+                <span className="flex-1 text-xs font-bold text-stone-500">Description</span>
+                <span className="basis-[100px] text-xs font-bold text-stone-500">Date</span>
+                <span className="basis-[100px] text-right text-xs font-bold text-stone-500">Amount</span>
             </div>
 
-            <div className="flex-1 overflow-scroll">
+            <div ref={tableRef} className="flex-1 overflow-scroll">
                 {expensesToDisplay.map((expense) => {
                     const isOptimistic = pendingExpense?.id === expense.id;
 
                     return (
                         <div
                             className={cn(
-                                'flex items-center justify-between border-b border-b-stone-100 p-2 transition-colors',
+                                'flex items-center justify-between border-b border-b-stone-100 p-2 text-sm text-stone-600 transition-colors',
                                 isOptimistic && 'bg-lime-200'
                             )}
                             key={expense.id}>
@@ -126,10 +139,19 @@ export default function ExpensesPage() {
                             <span className="basis-[100px] font-mono text-sm">
                                 {format(expense.createdAt, 'MM-dd-yyyy')}
                             </span>
-                            <span className="basis-[100px] text-right font-mono text-sm">{expense.amount}</span>
+                            <span className="basis-[100px] text-right font-mono text-sm">
+                                {numberFormatter.format(parseFloat(expense.amount))}
+                            </span>
                         </div>
                     );
                 })}
+            </div>
+
+            <div className="flex items-center justify-end p-4">
+                <p className="font-mono text-xl font-bold">
+                    <span className="font-serif text-sm font-extralight">PHP </span>
+                    {numberFormatter.format(totalMonthlyExpenses)}
+                </p>
             </div>
         </main>
     );

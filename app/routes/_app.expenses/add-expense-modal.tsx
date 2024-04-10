@@ -8,6 +8,7 @@ import NumberField from '~/components/number-field';
 import type { AddExpenseInput } from './schema';
 import type { useRemixForm } from 'remix-hook-form';
 import { cn } from '~/utils';
+import { modalContainerStyles } from '~/components/modal-container';
 
 type AddExpenseModalProps = {
     formMethods: ReturnType<typeof useRemixForm<AddExpenseInput>>;
@@ -33,9 +34,7 @@ export default function AddExpenseModal({ formMethods }: AddExpenseModalProps) {
 
     return (
         <DialogTrigger isOpen={isOpen} onOpenChange={setIsOpen}>
-            <Button color="lime" leftIcon={<ListPlus size={20} />}>
-                Add Expense
-            </Button>
+            <Button leftIcon={<ListPlus size={20} />}>Add Expense</Button>
             <ModalOverlay
                 isDismissable
                 className={({ isEntering }) =>
@@ -43,28 +42,30 @@ export default function AddExpenseModal({ formMethods }: AddExpenseModalProps) {
                         'fixed inset-0 z-10 flex min-h-full items-center justify-center overflow-y-auto bg-black/50 text-center backdrop-blur-sm',
                         isEntering && 'duration-300 ease-out animate-in fade-in'
                     )
-                }>
-                <Modal className="m-4 w-full border border-black bg-white sm:w-96">
+                }
+            >
+                <Modal className={modalContainerStyles().base()}>
                     <Dialog>
-                        <div className="relative flex items-center justify-between border-b border-black bg-stone-100 p-4">
-                            <Heading className="text-xl" slot="title">
+                        <div className={modalContainerStyles().header()}>
+                            <Heading className={modalContainerStyles().headerText()} slot="title">
                                 Add Expenses
                             </Heading>
 
-                            <Button className="border-0 p-1" onPress={() => setIsOpen(false)}>
+                            <Button variant="tertiary" size="icon-sm" onPress={() => setIsOpen(false)}>
                                 <X />
                             </Button>
                         </div>
 
                         <form
-                            className="p-4"
+                            className={modalContainerStyles().body()}
                             onSubmit={(event) => {
                                 if (isValid) {
                                     setIsOpen(false);
                                 }
                                 handleSubmit(event);
-                            }}>
-                            <div className="flex flex-col gap-4 py-2">
+                            }}
+                        >
+                            <div className="flex flex-col gap-4">
                                 <Controller
                                     control={control}
                                     name="amount"
@@ -98,15 +99,16 @@ export default function AddExpenseModal({ formMethods }: AddExpenseModalProps) {
                                 />
                             </div>
 
-                            <div className="mt-8 flex">
+                            <div className="mt-8 flex gap-4">
                                 <Button
+                                    variant="secondary"
+                                    className="flex-1"
                                     type="button"
-                                    color="stone"
-                                    className="w-full border-r-0"
-                                    onPress={() => setIsOpen(false)}>
+                                    onPress={() => setIsOpen(false)}
+                                >
                                     Cancel
                                 </Button>
-                                <Button type="submit" className="w-full" color="purple">
+                                <Button className="flex-1" type="submit">
                                     Submit
                                 </Button>
                             </div>
