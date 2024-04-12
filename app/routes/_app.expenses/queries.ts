@@ -1,4 +1,4 @@
-import { and, between, desc, eq, sum } from 'drizzle-orm';
+import { and, between, desc, eq, ilike, sum } from 'drizzle-orm';
 import db from '~/db';
 import { expenses } from '~/db/schema';
 import { startOfMonth, endOfMonth } from 'date-fns';
@@ -18,17 +18,32 @@ export type ExpenseParams = {
     userId: string;
     month?: number;
     year?: number;
+    search?: string;
 };
 
-export function getExpenses({ userId, month, year }: ExpenseParams) {
+export function getExpenses({ userId, month, year, search }: ExpenseParams) {
     const { startDate, endDate } = getFirstAndEndOfMonth({ month, year });
 
     return db
-        .select()
+        .select({
+            id: expenses.id,
+            description: expenses.description,
+            amount: expenses.amount,
+            createdAt: expenses.createdAt,
+            updatedAt: expenses.updatedAt,
+        })
         .from(expenses)
-        .where(and(eq(expenses.userId, userId), between(expenses.createdAt, startDate, endDate)))
+        .where(
+            and(
+                eq(expenses.userId, userId),
+                between(expenses.createdAt, startDate, endDate),
+                search ? ilike(expenses.description, `%${search}%`) : undefined
+            )
+        )
         .orderBy(desc(expenses.createdAt));
 }
+
+export type GetExpensesReturnType = Awaited<ReturnType<typeof getExpenses>>;
 
 export async function getMonthlyExpenses({ userId, month, year }: ExpenseParams) {
     const { startDate, endDate } = getFirstAndEndOfMonth({ month, year });

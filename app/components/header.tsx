@@ -10,7 +10,7 @@ export default function Header() {
     const submit = useSubmit();
 
     return (
-        <header className="border-b border-stone-200 bg-white px-4 py-3 text-stone-800">
+        <header className="border-b border-stone-200 bg-white px-4 py-3 text-stone-800 shadow-sm">
             <div className="container mx-auto flex items-center justify-between">
                 <div className="flex gap-4">
                     <NavLink
