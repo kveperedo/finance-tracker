@@ -6,7 +6,7 @@ export default {
     content: ['./app/**/*.{js,jsx,ts,tsx}'],
     theme: {
         fontFamily: {
-            serif: ['Open Sans   Variable', 'sans-serif'],
+            serif: ['Open Sans Variable', 'sans-serif'],
             mono: ['JetBrains Mono', 'monospace'],
         },
         extend: {},
