@@ -13,7 +13,7 @@ const buttonStyles = tv({
             primary: 'bg-stone-800 text-stone-100 shadow-sm hover:bg-stone-700 pressed:bg-stone-900',
             secondary: 'bg-stone-100 text-stone-800 shadow-sm hover:bg-stone-200 pressed:bg-stone-300',
             tertiary: 'bg-transparent text-stone-800 shadow-none hover:bg-stone-100 pressed:bg-stone-200',
-            outline: 'border border-stone-300 bg-transparent text-stone-800 hover:border-stone-400 hover:bg-stone-50',
+            outline: 'border border-stone-300 bg-white text-stone-800 hover:border-stone-400 hover:bg-stone-50',
         },
         size: {
             default: 'h-10 px-4 py-2',
@@ -46,7 +46,8 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
                 {...props}
                 className={composeRenderProps(props.className, (className, renderProps) =>
                     buttonStyles({ ...renderProps, variant, size, className })
-                )}>
+                )}
+            >
                 {leftIcon}
                 {children}
                 {rightIcon}
