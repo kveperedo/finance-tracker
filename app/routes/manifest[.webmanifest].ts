@@ -9,7 +9,7 @@ export const loader = () => {
             start_url: '/',
             display: 'standalone',
             background_color: '#ffffff',
-            theme_color: '#1c1917',
+            theme_color: '#ffffff',
             icons: [
                 {
                     src: '/logo.png',

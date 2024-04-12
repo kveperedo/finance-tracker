@@ -27,7 +27,7 @@ export default function ExpenseFilterDropdown() {
                 variant="outline"
                 rightIcon={<ChevronsUpDown size={16} />}
             >
-                {MONTHS[currentMonth as MonthKey]} {currentYear}
+                Expenses this {MONTHS[currentMonth as MonthKey]} {currentYear}
             </Button>
             <Popover triggerRef={triggerRef} isOpen={isPopoverOpen} onOpenChange={setIsPopoverOpen} showArrow>
                 <Dialog aria-label="Expense filter dropdown" className="w-72 p-4 outline-none">

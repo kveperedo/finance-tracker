@@ -34,7 +34,9 @@ export default function AddExpenseModal({ formMethods }: AddExpenseModalProps) {
 
     return (
         <DialogTrigger isOpen={isOpen} onOpenChange={setIsOpen}>
-            <Button leftIcon={<ListPlus size={16} />}>Add expense</Button>
+            <Button leftIcon={<ListPlus size={16} />}>
+                <span className="hidden sm:block">Add expense</span>
+            </Button>
             <ModalOverlay
                 isDismissable
                 className={({ isEntering }) =>

@@ -1,24 +1,27 @@
-import { useFetcher, useLoaderData } from '@remix-run/react';
+import { useFetcher, useLoaderData, useSearchParams } from '@remix-run/react';
 import { json, redirect } from '@vercel/remix';
 import type { ExpenseParams } from './queries';
 import { addExpense, getExpenses, getMonthlyExpenses } from './queries';
-import { format } from 'date-fns';
 import AddExpenseModal from './add-expense-modal';
 import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from '@vercel/remix';
 import type { AddExpenseInput } from './schema';
 import { addExpenseSchema } from './schema';
-import type { Expense } from '~/db/types';
 import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
 import { getValidatedFormData, useRemixForm } from 'remix-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { getUserId } from '~/auth/session.server';
 import { generateFormData } from '~/lib/remix-hook-form';
-import { cn, numberFormatter } from '~/utils';
+import { numberFormatter } from '~/utils';
 import ExpenseFilterDropdown from './expense-filter-dropdown';
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import type { MonthKey } from './constants';
 import { MONTHS } from './constants';
+import ExpensesList from './expenses-list';
+import Input from '~/components/input';
+import { SearchField } from 'react-aria-components';
+import Button from '~/components/button';
+import { CircleX, Search } from 'lucide-react';
 
 export const meta: MetaFunction = ({ location }) => {
     const searchParams = new URLSearchParams(location.search);
@@ -73,11 +76,13 @@ export async function loader({ request }: LoaderFunctionArgs) {
     const searchParams = new URL(request.url).searchParams;
     const month = searchParams.get('month');
     const year = searchParams.get('year');
+    const search = searchParams.get('q');
 
     const params: ExpenseParams = {
         userId,
         month: month ? Number(month) : undefined,
         year: year ? Number(year) : undefined,
+        search: search ?? undefined,
     };
 
     const [expenses, monthlyExpenses] = await Promise.all([getExpenses(params), getMonthlyExpenses(params)]);
@@ -86,8 +91,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export default function ExpensesPage() {
+    const [searchParams, setSearchParams] = useSearchParams();
+    const search = searchParams.get('q') ?? '';
     const { expenses, monthlyExpenses } = useLoaderData<typeof loader>();
-    const tableRef = useRef<HTMLDivElement>(null);
+    const gridRef = useRef<HTMLDivElement>(null);
     const fetcher = useFetcher<typeof action>();
     const formMethods = useRemixForm<AddExpenseInput>({
         resolver: zodResolver(addExpenseSchema),
@@ -101,87 +108,92 @@ export default function ExpensesPage() {
         fetcher,
     });
     const {
-        formState: { isSubmitting, isSubmitted },
+        formState: { isSubmitting, isSubmitSuccessful },
     } = formMethods;
 
     useEffect(() => {
-        if (isSubmitted) {
-            tableRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+        if (isSubmitSuccessful) {
+            gridRef.current?.scrollTo({ top: 0 });
         }
-    }, [isSubmitting, isSubmitted]);
+    }, [isSubmitting, isSubmitSuccessful]);
 
     const pendingExpense = fetcher.formData
         ? (generateFormData(fetcher.formData) as AddExpenseInput & { id: string })
         : null;
 
     const totalMonthlyExpenses = monthlyExpenses + (pendingExpense?.amount ?? 0);
-    const expensesToDisplay = pendingExpense
-        ? [
-              {
-                  ...pendingExpense,
-                  amount: String(pendingExpense.amount),
-                  createdAt: new Date(),
-                  updatedAt: new Date(),
-              } as Expense,
-              ...expenses,
-          ]
-        : expenses;
-    const hasEmptyExpenses = expensesToDisplay.length === 0;
+
+    const expensesToDisplay = useMemo(() => {
+        const transformedExpenses = expenses.map((expense) => ({
+            ...expense,
+            createdAt: new Date(expense.createdAt),
+            updatedAt: new Date(expense.updatedAt),
+        }));
+
+        type Expense = (typeof transformedExpenses)[number];
+
+        return pendingExpense
+            ? [
+                  {
+                      ...pendingExpense,
+                      amount: String(pendingExpense.amount),
+                      createdAt: new Date(),
+                      updatedAt: new Date(),
+                  } as Expense,
+                  ...transformedExpenses,
+              ]
+            : transformedExpenses;
+    }, [expenses, pendingExpense]);
 
     return (
-        <main className="container m-auto mx-auto flex w-full flex-1 flex-col overflow-hidden">
-            <div className="flex items-center justify-between px-4 py-4 sm:px-0">
+        <main className="container m-auto mx-auto flex min-h-0 w-full flex-1 flex-col">
+            <div className="flex items-center justify-between gap-4 px-4 py-4 sm:px-0">
                 <ExpenseFilterDropdown />
                 <AddExpenseModal formMethods={formMethods} />
             </div>
 
-            {hasEmptyExpenses ? (
-                <div className="flex flex-1 flex-col items-center justify-center gap-1">
-                    <p className="font-semibold">No expenses this month!</p>
-                    <p className="text-sm text-stone-500">Start adding expenses by clicking the button above.</p>
-                </div>
-            ) : (
-                <>
-                    <div className="flex justify-between rounded bg-stone-100 p-2">
-                        <span className="flex-1 text-xs font-bold text-stone-500">Description</span>
-                        <span className="basis-[100px] text-xs font-bold text-stone-500">Date</span>
-                        <span className="basis-[100px] text-right text-xs font-bold text-stone-500">Amount</span>
-                    </div>
+            <div className="mx-4 mb-4 flex min-h-0 flex-1 flex-col rounded border border-stone-300 bg-white px-0 shadow-sm sm:mx-0">
+                <ExpensesList ref={gridRef} expenses={expensesToDisplay} pendingExpenseId={pendingExpense?.id} />
 
-                    <div ref={tableRef} className="flex-1 overflow-scroll">
-                        {expensesToDisplay.map((expense) => {
-                            const isOptimistic = pendingExpense?.id === expense.id;
+                <div className="flex items-center justify-between gap-4 border-t border-stone-200 p-4">
+                    <SearchField
+                        key={search}
+                        className="group relative flex items-center"
+                        defaultValue={search}
+                        onSubmit={(newSearch) => {
+                            setSearchParams((searchParams) => {
+                                searchParams.set('q', newSearch.toLowerCase());
+                                return searchParams;
+                            });
+                        }}
+                        onClear={() => {
+                            setSearchParams((searchParams) => {
+                                // eslint-disable-next-line drizzle/enforce-delete-with-where
+                                searchParams.delete('q');
+                                return searchParams;
+                            });
+                        }}
+                    >
+                        <Search className="absolute left-0 ml-3 text-stone-500" size={16} />
+                        <Input
+                            className="px-10 [&::-webkit-search-cancel-button]:hidden"
+                            placeholder="Search expenses"
+                        />
+                        <Button
+                            className="absolute right-0 mr-[6px] text-stone-500 group-empty:invisible"
+                            variant="tertiary"
+                            size="icon-sm"
+                        >
+                            <CircleX size={16} />
+                        </Button>
+                    </SearchField>
 
-                            return (
-                                <div
-                                    className={cn(
-                                        'flex items-center justify-between border-b border-b-stone-100 p-2 text-sm text-stone-600 transition-colors',
-                                        isOptimistic && 'bg-lime-200'
-                                    )}
-                                    key={expense.id}
-                                >
-                                    <span className="flex-1">{expense.description}</span>
-                                    <span className="basis-[100px] font-mono text-sm">
-                                        {format(expense.createdAt, 'MM-dd-yyyy')}
-                                    </span>
-                                    <span className="basis-[100px] text-right font-mono text-sm">
-                                        {numberFormatter.format(parseFloat(expense.amount))}
-                                    </span>
-                                </div>
-                            );
-                        })}
-                    </div>
-                </>
-            )}
-
-            {!hasEmptyExpenses && (
-                <div className="flex items-center justify-end p-4">
-                    <p className="font-mono text-xl font-bold">
-                        <span className="font-serif text-sm font-extralight">PHP </span>
+                    <p className="flex items-baseline gap-1 text-xl font-bold">
+                        <span className="font-serif text-sm font-light">PHP </span>
                         {numberFormatter.format(totalMonthlyExpenses)}
                     </p>
                 </div>
-            )}
+            </div>
         </main>
     );
 }

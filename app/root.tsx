@@ -27,7 +27,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 <ManifestLink />
                 <Links />
             </head>
-            <body className="flex h-screen flex-col">
+            <body className="flex h-screen flex-col bg-stone-50">
                 <ProgressBar />
                 {children}
                 <ScrollRestoration />

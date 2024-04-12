@@ -10,7 +10,7 @@ export default function Header() {
     const submit = useSubmit();
 
     return (
-        <header className="border-b border-stone-200 bg-stone-50 px-4 py-3 text-stone-800">
+        <header className="border-b border-stone-200 bg-white px-4 py-3 text-stone-800 shadow-sm">
             <div className="container mx-auto flex items-center justify-between">
                 <div className="flex gap-4">
                     <NavLink
@@ -18,7 +18,8 @@ export default function Header() {
                             cn('text-sm text-stone-500', isActive && 'font-semibold text-stone-800')
                         }
                         to="/expenses"
-                        prefetch="intent">
+                        prefetch="intent"
+                    >
                         Expenses
                     </NavLink>
                     <NavLink
@@ -26,7 +27,8 @@ export default function Header() {
                             cn('text-sm text-stone-500', isActive && 'font-semibold text-stone-800')
                         }
                         to="/investments"
-                        prefetch="intent">
+                        prefetch="intent"
+                    >
                         Investments
                     </NavLink>
                 </div>
@@ -42,7 +44,8 @@ export default function Header() {
                                 if (id === 'logout') {
                                     submit(null, { method: 'post', action: '/logout' });
                                 }
-                            }}>
+                            }}
+                        >
                             <MenuItem id="logout">
                                 <LogOut className="mr-2" size={20} />
                                 Logout
