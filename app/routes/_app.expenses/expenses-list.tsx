@@ -1,7 +1,7 @@
 import { GridList, GridListItem } from 'react-aria-components';
 import type { GetExpensesReturnType } from './queries';
 import { format } from 'date-fns';
-import { cn } from '~/utils';
+import { cn, numberFormatter } from '~/utils';
 import { forwardRef } from 'react';
 import { useSearchParams } from '@remix-run/react';
 import { EmptyExpenses, EmptySearchExpenses } from './empty';
@@ -37,7 +37,7 @@ const ExpensesList = forwardRef<HTMLDivElement, ExpenseListProps>(({ expenses, p
                     <GridListItem
                         className={({ isFocused }) =>
                             cn(
-                                'flex items-center justify-between border-b border-stone-100 px-4 py-2 transition-colors',
+                                'flex items-center justify-between border-b border-stone-100 px-4 py-2',
                                 isFocused && 'border-stone-300 bg-stone-50 outline-none',
                                 isPendingExpense && 'bg-stone-100'
                             )
@@ -49,7 +49,7 @@ const ExpensesList = forwardRef<HTMLDivElement, ExpenseListProps>(({ expenses, p
                             <p className="text-xs text-stone-400">{format(expense.createdAt, 'MMMM dd')}</p>
                         </div>
 
-                        <p className="text-right font-semibold">{expense.amount}</p>
+                        <p className="text-right font-semibold">{numberFormatter.format(Number(expense.amount))}</p>
                     </GridListItem>
                 );
             }}

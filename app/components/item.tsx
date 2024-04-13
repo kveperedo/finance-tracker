@@ -8,7 +8,7 @@ import { tv } from 'tailwind-variants';
 const itemStyles = tv({
     base: 'flex cursor-pointer items-center rounded p-2 data-[focused]:outline-none',
     variants: {
-        isSelected: { true: 'bg-stone-300' },
+        isSelected: { true: 'bg-stone-200' },
         isHovered: { true: '' },
         isFocused: { true: '' },
     },

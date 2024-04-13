@@ -1,14 +1,12 @@
 import { ListPlus, X } from 'lucide-react';
 import { Dialog, DialogTrigger, Heading, Modal, ModalOverlay } from 'react-aria-components';
-import { Controller } from 'react-hook-form';
-import TextField from '~/components/text-field';
 import { useEffect, useState } from 'react';
 import Button from '~/components/button';
-import NumberField from '~/components/number-field';
 import type { AddExpenseInput } from './schema';
 import type { useRemixForm } from 'remix-hook-form';
 import { cn } from '~/utils';
 import { modalContainerStyles } from '~/components/modal-container';
+import ExpenseForm from './expense-form';
 
 type AddExpenseModalProps = {
     formMethods: ReturnType<typeof useRemixForm<AddExpenseInput>>;
@@ -19,7 +17,6 @@ export default function AddExpenseModal({ formMethods }: AddExpenseModalProps) {
     const {
         reset,
         handleSubmit,
-        control,
         formState: { isValid },
     } = formMethods;
 
@@ -34,8 +31,8 @@ export default function AddExpenseModal({ formMethods }: AddExpenseModalProps) {
 
     return (
         <DialogTrigger isOpen={isOpen} onOpenChange={setIsOpen}>
-            <Button leftIcon={<ListPlus size={16} />}>
-                <span className="hidden sm:block">Add expense</span>
+            <Button size="icon">
+                <ListPlus size={16} />
             </Button>
             <ModalOverlay
                 isDismissable
@@ -58,63 +55,31 @@ export default function AddExpenseModal({ formMethods }: AddExpenseModalProps) {
                             </Button>
                         </div>
 
-                        <form
-                            className={modalContainerStyles().body()}
-                            onSubmit={(event) => {
-                                if (isValid) {
-                                    setIsOpen(false);
-                                }
-                                handleSubmit(event);
-                            }}
-                        >
-                            <div className="flex flex-col gap-4">
-                                <Controller
-                                    control={control}
-                                    name="amount"
-                                    render={({ field, fieldState: { error } }) => {
-                                        return (
-                                            <NumberField
-                                                autoFocus
-                                                label="Amount"
-                                                {...field}
-                                                onChange={(value) => {
-                                                    field.onChange(isNaN(value) ? 0 : value);
-                                                }}
-                                                isInvalid={!!error?.message}
-                                                errorMessage={error?.message}
-                                            />
-                                        );
-                                    }}
-                                />
-
-                                <Controller
-                                    control={control}
-                                    name="description"
-                                    render={({ field, fieldState: { error } }) => (
-                                        <TextField
-                                            label="Description"
-                                            {...field}
-                                            isInvalid={!!error?.message}
-                                            errorMessage={error?.message}
-                                        />
-                                    )}
-                                />
-                            </div>
-
-                            <div className="mt-8 flex gap-4">
-                                <Button
-                                    variant="secondary"
-                                    className="flex-1"
-                                    type="button"
-                                    onPress={() => setIsOpen(false)}
-                                >
-                                    Cancel
-                                </Button>
-                                <Button className="flex-1" type="submit">
-                                    Submit
-                                </Button>
-                            </div>
-                        </form>
+                        <div className={modalContainerStyles().body()}>
+                            <ExpenseForm
+                                formMethods={formMethods}
+                                onSubmit={(event) => {
+                                    if (isValid) {
+                                        setIsOpen(false);
+                                    }
+                                    handleSubmit(event);
+                                }}
+                            >
+                                <div className="mt-8 flex gap-4">
+                                    <Button
+                                        variant="secondary"
+                                        className="flex-1"
+                                        type="button"
+                                        onPress={() => setIsOpen(false)}
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button className="flex-1" type="submit">
+                                        Submit
+                                    </Button>
+                                </div>
+                            </ExpenseForm>
+                        </div>
                     </Dialog>
                 </Modal>
             </ModalOverlay>
