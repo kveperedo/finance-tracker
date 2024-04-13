@@ -1,4 +1,4 @@
-import { useFetcher, useLoaderData, useSearchParams } from '@remix-run/react';
+import { useFetcher, useLoaderData } from '@remix-run/react';
 import { json, redirect } from '@vercel/remix';
 import type { ExpenseParams } from './queries';
 import { addExpense, getExpenses, getMonthlyExpenses } from './queries';
@@ -18,10 +18,9 @@ import { useEffect, useMemo, useRef } from 'react';
 import type { MonthKey } from './constants';
 import { MONTHS } from './constants';
 import ExpensesList from './expenses-list';
-import Input from '~/components/input';
-import { SearchField } from 'react-aria-components';
 import Button from '~/components/button';
-import { CircleX, Search } from 'lucide-react';
+import ExpenseForm from './expense-form';
+import ExpenseSearchField from './expense-search-field';
 
 export const meta: MetaFunction = ({ location }) => {
     const searchParams = new URLSearchParams(location.search);
@@ -91,8 +90,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export default function ExpensesPage() {
-    const [searchParams, setSearchParams] = useSearchParams();
-    const search = searchParams.get('q') ?? '';
     const { expenses, monthlyExpenses } = useLoaderData<typeof loader>();
     const gridRef = useRef<HTMLDivElement>(null);
     const fetcher = useFetcher<typeof action>();
@@ -109,7 +106,15 @@ export default function ExpensesPage() {
     });
     const {
         formState: { isSubmitting, isSubmitSuccessful },
+        handleSubmit,
+        reset,
     } = formMethods;
+
+    useEffect(() => {
+        if (isSubmitSuccessful) {
+            reset();
+        }
+    }, [isSubmitting, isSubmitSuccessful, reset]);
 
     useEffect(() => {
         if (isSubmitSuccessful) {
@@ -146,54 +151,40 @@ export default function ExpensesPage() {
     }, [expenses, pendingExpense]);
 
     return (
-        <main className="container m-auto mx-auto flex min-h-0 w-full flex-1 flex-col">
-            <div className="flex items-center justify-between gap-4 px-4 py-4 sm:px-0">
-                <ExpenseFilterDropdown />
-                <AddExpenseModal formMethods={formMethods} />
-            </div>
-
-            <div className="mx-4 mb-4 flex min-h-0 flex-1 flex-col rounded border border-stone-300 bg-white px-0 shadow-sm sm:mx-0">
-                <ExpensesList ref={gridRef} expenses={expensesToDisplay} pendingExpenseId={pendingExpense?.id} />
-
-                <div className="flex items-center justify-between gap-4 border-t border-stone-200 p-4">
-                    <SearchField
-                        key={search}
-                        className="group relative flex items-center"
-                        defaultValue={search}
-                        onSubmit={(newSearch) => {
-                            setSearchParams((searchParams) => {
-                                searchParams.set('q', newSearch.toLowerCase());
-                                return searchParams;
-                            });
-                        }}
-                        onClear={() => {
-                            setSearchParams((searchParams) => {
-                                // eslint-disable-next-line drizzle/enforce-delete-with-where
-                                searchParams.delete('q');
-                                return searchParams;
-                            });
-                        }}
-                    >
-                        <Search className="absolute left-0 ml-3 text-stone-500" size={16} />
-                        <Input
-                            className="px-10 [&::-webkit-search-cancel-button]:hidden"
-                            placeholder="Search expenses"
-                        />
-                        <Button
-                            className="absolute right-0 mr-[6px] text-stone-500 group-empty:invisible"
-                            variant="tertiary"
-                            size="icon-sm"
-                        >
-                            <CircleX size={16} />
-                        </Button>
-                    </SearchField>
-
-                    <p className="flex items-baseline gap-1 text-xl font-bold">
-                        <span className="font-serif text-sm font-light">PHP </span>
-                        {numberFormatter.format(totalMonthlyExpenses)}
-                    </p>
+        <div className="container mx-auto flex min-h-0 w-full flex-1 gap-4">
+            <main className="flex flex-1 flex-col">
+                <div className="flex items-center justify-between gap-4 px-4 py-4 sm:px-0">
+                    <ExpenseFilterDropdown />
+                    <div className="block sm:hidden">
+                        <AddExpenseModal formMethods={formMethods} />
+                    </div>
                 </div>
-            </div>
-        </main>
+
+                <div className="mx-4 mb-4 flex min-h-0 flex-1 flex-col rounded border border-stone-300 bg-white px-0 shadow-sm sm:mx-0">
+                    <ExpensesList ref={gridRef} expenses={expensesToDisplay} pendingExpenseId={pendingExpense?.id} />
+
+                    <div className="flex items-center justify-between gap-4 border-t border-stone-200 p-4">
+                        <ExpenseSearchField />
+
+                        <p className="flex items-baseline gap-1 text-xl font-bold">
+                            <span className="font-serif text-sm font-light">PHP</span>
+                            {numberFormatter.format(totalMonthlyExpenses)}
+                        </p>
+                    </div>
+                </div>
+            </main>
+            <aside className="hidden w-96 sm:block">
+                <div className="mt-[72px] rounded border border-stone-300 bg-white">
+                    <p className="border-b border-stone-300 p-4 text-lg font-bold text-stone-700">Add Expenses</p>
+                    <div className="p-8">
+                        <ExpenseForm formMethods={formMethods} onSubmit={handleSubmit}>
+                            <Button className="mt-8 w-full" type="submit">
+                                Submit
+                            </Button>
+                        </ExpenseForm>
+                    </div>
+                </div>
+            </aside>
+        </div>
     );
 }
