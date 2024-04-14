@@ -56,29 +56,31 @@ export default function AddExpenseModal({ formMethods }: AddExpenseModalProps) {
                         </div>
 
                         <div className={modalContainerStyles().body()}>
-                            <ExpenseForm
-                                formMethods={formMethods}
-                                onSubmit={(event) => {
-                                    if (isValid) {
-                                        setIsOpen(false);
-                                    }
-                                    handleSubmit(event);
-                                }}
-                            >
-                                <div className="mt-8 flex gap-4">
-                                    <Button
-                                        variant="secondary"
-                                        className="flex-1"
-                                        type="button"
-                                        onPress={() => setIsOpen(false)}
-                                    >
-                                        Cancel
-                                    </Button>
-                                    <Button className="flex-1" type="submit">
-                                        Submit
-                                    </Button>
-                                </div>
-                            </ExpenseForm>
+                            {isOpen && (
+                                <ExpenseForm
+                                    formMethods={formMethods}
+                                    onSubmit={(event) => {
+                                        if (isValid) {
+                                            setIsOpen(false);
+                                        }
+                                        handleSubmit(event);
+                                    }}
+                                >
+                                    <div className="mt-8 flex gap-4">
+                                        <Button
+                                            variant="secondary"
+                                            className="flex-1"
+                                            type="button"
+                                            onPress={() => setIsOpen(false)}
+                                        >
+                                            Cancel
+                                        </Button>
+                                        <Button className="flex-1" type="submit">
+                                            Submit
+                                        </Button>
+                                    </div>
+                                </ExpenseForm>
+                            )}
                         </div>
                     </Dialog>
                 </Modal>
