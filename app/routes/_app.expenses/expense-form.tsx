@@ -6,11 +6,12 @@ import TextField from '~/components/text-field';
 import type { PropsWithChildren } from 'react';
 
 type ExpenseFormProps = PropsWithChildren<{
+    autoFocus?: boolean;
     formMethods: ReturnType<typeof useRemixForm<AddExpenseInput>>;
     onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
 }>;
 
-export default function ExpenseForm({ formMethods, onSubmit, children }: ExpenseFormProps) {
+export default function ExpenseForm({ autoFocus, formMethods, onSubmit, children }: ExpenseFormProps) {
     const { control } = formMethods;
 
     return (
@@ -22,7 +23,7 @@ export default function ExpenseForm({ formMethods, onSubmit, children }: Expense
                     render={({ field, fieldState: { error } }) => {
                         return (
                             <NumberField
-                                autoFocus
+                                autoFocus={autoFocus}
                                 label="Amount"
                                 {...field}
                                 onChange={(value) => {

@@ -58,6 +58,7 @@ export default function AddExpenseModal({ formMethods }: AddExpenseModalProps) {
                         <div className={modalContainerStyles().body()}>
                             {isOpen && (
                                 <ExpenseForm
+                                    autoFocus
                                     formMethods={formMethods}
                                     onSubmit={(event) => {
                                         if (isValid) {
