@@ -1,5 +1,5 @@
-import { useSearchParams } from '@remix-run/react';
 import Button from '~/components/button';
+import useExpenseSearchParams from './hooks/useExpenseSearchParams';
 
 export function EmptyExpenses() {
     return (
@@ -11,7 +11,7 @@ export function EmptyExpenses() {
 }
 
 export function EmptySearchExpenses() {
-    const [, setSearchParams] = useSearchParams();
+    const [, actions] = useExpenseSearchParams();
 
     return (
         <div className="flex flex-1 flex-col items-center justify-center gap-1">
@@ -21,11 +21,7 @@ export function EmptySearchExpenses() {
                 variant="outline"
                 className="mt-2"
                 onPress={() => {
-                    setSearchParams((searchParams) => {
-                        // eslint-disable-next-line drizzle/enforce-delete-with-where
-                        searchParams.delete('q');
-                        return searchParams;
-                    });
+                    actions.deleteParam('month', 'year');
                 }}
             >
                 Clear search

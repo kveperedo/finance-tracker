@@ -5,19 +5,17 @@ import { MONTHS, generateYears } from './constants';
 import { ChevronsUpDown, FilterX } from 'lucide-react';
 import Popover from '~/components/popover';
 import { ListBoxItem } from '~/components/item';
-import { useSearchParams } from '@remix-run/react';
 import Button from '~/components/button';
 import Select from '~/components/select';
 import { useRef, useState } from 'react';
+import useExpenseSearchParams from './hooks/useExpenseSearchParams';
 
 const YEARS = generateYears();
 
 export default function ExpenseFilterDropdown() {
     const triggerRef = useRef(null);
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-    const [searchParams, setSearchParams] = useSearchParams();
-    const currentMonth = Number(searchParams.get('month') ?? new Date().getMonth() + 1);
-    const currentYear = Number(searchParams.get('year') ?? new Date().getFullYear());
+    const [{ month: currentMonth, year: currentYear }, actions] = useExpenseSearchParams();
 
     return (
         <>
@@ -27,7 +25,7 @@ export default function ExpenseFilterDropdown() {
                 variant="outline"
                 rightIcon={<ChevronsUpDown size={16} />}
             >
-                Expenses this {MONTHS[currentMonth as MonthKey]} {currentYear}
+                {MONTHS[currentMonth as MonthKey]} {currentYear}
             </Button>
             <Popover triggerRef={triggerRef} isOpen={isPopoverOpen} onOpenChange={setIsPopoverOpen} showArrow>
                 <Dialog aria-label="Expense filter dropdown" className="w-72 p-4 outline-none">
@@ -40,10 +38,7 @@ export default function ExpenseFilterDropdown() {
                             defaultSelectedKey={currentMonth}
                             selectedKey={currentMonth}
                             onSelectionChange={(key) => {
-                                setSearchParams((searchParams) => {
-                                    searchParams.set('month', String(key));
-                                    return searchParams;
-                                });
+                                actions.setParam('month', String(key));
                             }}
                         >
                             {Object.entries(MONTHS).map(([key, value]) => (
@@ -59,10 +54,7 @@ export default function ExpenseFilterDropdown() {
                             defaultSelectedKey={currentYear}
                             selectedKey={currentYear}
                             onSelectionChange={(key) => {
-                                setSearchParams((searchParams) => {
-                                    searchParams.set('year', String(key));
-                                    return searchParams;
-                                });
+                                actions.setParam('year', String(key));
                             }}
                         >
                             {YEARS.map((year) => (
@@ -76,11 +68,7 @@ export default function ExpenseFilterDropdown() {
                     <Button
                         onPress={() => {
                             setIsPopoverOpen(false);
-                            setSearchParams((searchParams) => {
-                                searchParams.delete('month');
-                                searchParams.delete('year');
-                                return searchParams;
-                            });
+                            actions.deleteParam('month', 'year');
                         }}
                         variant="secondary"
                         className="mt-4 w-full"
