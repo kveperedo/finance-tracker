@@ -1,7 +1,7 @@
 import { useFetcher, useLoaderData } from '@remix-run/react';
 import { redirect } from '@vercel/remix';
 import type { ExpenseParams } from './queries';
-import { addExpense, getExpenses, getMonthlyExpenses } from './queries';
+import { getExpenses, getMonthlyExpenses, getSavingsSummary, getUserMonthlyIncome } from './queries';
 import AddExpenseModal from './add-expense-modal';
 import type { LoaderFunctionArgs, MetaFunction } from '@vercel/remix';
 import { getUserId } from '~/auth/session.server';
@@ -15,6 +15,7 @@ import ExpensesList from './expenses-list';
 import Button from '~/components/button';
 import ExpenseForm, { EXPENSE_FETCHER_KEY } from '../resources.expenses/expense-form';
 import ExpenseSearchField from './expense-search-field';
+import MonthlySavingsPanel from './monthly-savings-panel';
 import type { AddExpenseInput } from '../resources.expenses/schema';
 
 export const meta: MetaFunction = ({ location }) => {
@@ -49,9 +50,14 @@ export async function loader({ request }: LoaderFunctionArgs) {
         search: search ?? undefined,
     };
 
-    const [expenses, monthlyExpenses] = await Promise.all([getExpenses(params), getMonthlyExpenses(params)]);
+    const [expenses, monthlyExpenses, monthlyIncome, savingsSummary] = await Promise.all([
+        getExpenses(params),
+        getMonthlyExpenses(params),
+        getUserMonthlyIncome(userId),
+        getSavingsSummary(params),
+    ]);
 
-    return { expenses, monthlyExpenses };
+    return { expenses, monthlyExpenses, monthlyIncome, savingsSummary };
 }
 
 export default function ExpensesPage() {
@@ -97,12 +103,12 @@ export default function ExpensesPage() {
                     <div className="flex items-center justify-between gap-4 border-b border-stone-300 p-4">
                         <p className="text-sm font-medium">Expenses this month</p>
                         <div className="ml-auto">
-                    <ExpenseFilterDropdown />
+                            <ExpenseFilterDropdown />
                         </div>
-                    <div className="block sm:hidden">
+                        <div className="block sm:hidden">
                             <AddExpenseModal />
+                        </div>
                     </div>
-                </div>
 
                     <ExpensesList ref={gridRef} expenses={expensesToDisplay} pendingExpenseId={pendingExpense?.id} />
 
@@ -116,17 +122,20 @@ export default function ExpensesPage() {
                     </div>
                 </div>
             </main>
-            <aside className="hidden w-96 sm:block">
-                <div className="mt-[72px] rounded border border-stone-300 bg-white">
-                    <p className="border-b border-stone-300 p-4 text-lg font-bold text-stone-700">Add Expenses</p>
-                    <div className="p-8">
-                        <ExpenseForm formMethods={formMethods} onSubmit={handleSubmit}>
+            <aside className="my-4 hidden w-96 flex-col gap-4 sm:flex">
+                <div className="rounded border border-stone-300 bg-white">
+                    <div className="border-b border-stone-300 p-4">
+                        <p className="text-sm font-medium">Add expenses</p>
+                    </div>
+                    <div className="p-4">
+                        <ExpenseForm fetcher={fetcher} onSubmitSuccess={handleSubmit}>
                             <Button className="mt-8 w-full" type="submit">
                                 Submit
                             </Button>
                         </ExpenseForm>
                     </div>
                 </div>
+                <MonthlySavingsPanel />
             </aside>
         </div>
     );

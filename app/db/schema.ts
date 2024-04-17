@@ -1,11 +1,4 @@
-import {
-    numeric,
-    pgTable,
-    text,
-    timestamp,
-    uniqueIndex,
-    uuid,
-} from 'drizzle-orm/pg-core';
+import { numeric, pgTable, text, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core';
 
 export const users = pgTable(
     'users',
@@ -20,6 +13,21 @@ export const users = pgTable(
     },
     (table) => ({
         emailIdx: uniqueIndex('email_idx').on(table.email),
+    })
+);
+
+export const userDetails = pgTable(
+    'user_details',
+    {
+        id: uuid('id').defaultRandom().primaryKey(),
+        monthlyIncome: numeric('monthly_income', { precision: 10, scale: 2 }),
+        userId: uuid('user_id')
+            .references(() => users.id, { onDelete: 'cascade' })
+            .notNull()
+            .unique(),
+    },
+    (table) => ({
+        userIdIdx: uniqueIndex('user_id_idx').on(table.userId),
     })
 );
 
