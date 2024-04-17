@@ -1,33 +1,19 @@
 import { ListPlus, X } from 'lucide-react';
 import { Dialog, DialogTrigger, Heading, Modal, ModalOverlay } from 'react-aria-components';
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import Button from '~/components/button';
-import type { AddExpenseInput } from './schema';
-import type { useRemixForm } from 'remix-hook-form';
 import { cn } from '~/utils';
 import { modalContainerStyles } from '~/components/modal-container';
-import ExpenseForm from './expense-form';
+import ExpenseForm, { EXPENSE_FETCHER_KEY } from '../resources.expenses/expense-form';
+import { useFetcher } from '@remix-run/react';
 
-type AddExpenseModalProps = {
-    formMethods: ReturnType<typeof useRemixForm<AddExpenseInput>>;
-};
-
-export default function AddExpenseModal({ formMethods }: AddExpenseModalProps) {
+export default function AddExpenseModal() {
     const [isOpen, setIsOpen] = useState(false);
-    const {
-        reset,
-        handleSubmit,
-        formState: { isValid },
-    } = formMethods;
+    const fetcher = useFetcher({ key: EXPENSE_FETCHER_KEY });
 
-    useEffect(
-        function resetFormOnUnmount() {
-            if (!isOpen) {
-                reset();
-            }
-        },
-        [isOpen, reset]
-    );
+    const handleSubmitSuccess = useCallback(() => {
+        setIsOpen(false);
+    }, []);
 
     return (
         <DialogTrigger isOpen={isOpen} onOpenChange={setIsOpen}>
@@ -56,32 +42,21 @@ export default function AddExpenseModal({ formMethods }: AddExpenseModalProps) {
                         </div>
 
                         <div className={modalContainerStyles().body()}>
-                            {isOpen && (
-                                <ExpenseForm
-                                    autoFocus
-                                    formMethods={formMethods}
-                                    onSubmit={(event) => {
-                                        if (isValid) {
-                                            setIsOpen(false);
-                                        }
-                                        handleSubmit(event);
-                                    }}
-                                >
-                                    <div className="mt-8 flex gap-4">
-                                        <Button
-                                            variant="secondary"
-                                            className="flex-1"
-                                            type="button"
-                                            onPress={() => setIsOpen(false)}
-                                        >
-                                            Cancel
-                                        </Button>
-                                        <Button className="flex-1" type="submit">
-                                            Submit
-                                        </Button>
-                                    </div>
-                                </ExpenseForm>
-                            )}
+                            <ExpenseForm fetcher={fetcher} autoFocus onSubmitSuccess={handleSubmitSuccess}>
+                                <div className="mt-8 flex gap-4">
+                                    <Button
+                                        variant="secondary"
+                                        className="flex-1"
+                                        type="button"
+                                        onPress={() => setIsOpen(false)}
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button className="flex-1" type="submit">
+                                        Submit
+                                    </Button>
+                                </div>
+                            </ExpenseForm>
                         </div>
                     </Dialog>
                 </Modal>
