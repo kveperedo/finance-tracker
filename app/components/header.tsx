@@ -47,7 +47,7 @@ export default function Header() {
                             }}
                         >
                             <MenuItem id="logout">
-                                <LogOut className="mr-2" size={20} />
+                                <LogOut className="mr-3" size={16} />
                                 Logout
                             </MenuItem>
                         </Menu>

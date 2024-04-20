@@ -5,6 +5,7 @@ import { cn, numberFormatter } from '~/utils';
 import { forwardRef } from 'react';
 import { EmptyExpenses, EmptySearchExpenses } from './empty';
 import useExpenseSearchParams from './hooks/useExpenseSearchParams';
+import ExpenseMenu from './expense-menu';
 
 type ExpenseListProps = {
     pendingExpenseId?: string;
@@ -38,7 +39,7 @@ const ExpensesList = forwardRef<HTMLDivElement, ExpenseListProps>(({ expenses, p
                         className={({ isFocused }) =>
                             cn(
                                 'flex items-center justify-between border-b border-stone-100 px-4 py-2',
-                                isFocused && 'border-stone-300 bg-stone-50 outline-none',
+                                isFocused && 'outline-none',
                                 isPendingExpense && 'bg-stone-100'
                             )
                         }
@@ -49,7 +50,10 @@ const ExpensesList = forwardRef<HTMLDivElement, ExpenseListProps>(({ expenses, p
                             <p className="text-xs text-stone-400">{format(expense.createdAt, 'MMMM dd')}</p>
                         </div>
 
-                        <p className="text-right font-semibold">{numberFormatter.format(Number(expense.amount))}</p>
+                        <div className="flex items-center gap-2">
+                            <p className="text-right font-semibold">{numberFormatter.format(Number(expense.amount))}</p>
+                            <ExpenseMenu expense={expense} isPendingExpense={isPendingExpense} />
+                        </div>
                     </GridListItem>
                 );
             }}

@@ -1,5 +1,6 @@
 import { useRemixForm } from 'remix-hook-form';
-import { addExpenseSchema, type AddExpenseInput } from './schema';
+import type { AddExpenseInputWithId, AddExpenseInput } from './schema';
+import { addExpenseSchema } from './schema';
 import { Controller } from 'react-hook-form';
 import NumberField from '~/components/number-field';
 import TextField from '~/components/text-field';
@@ -14,9 +15,17 @@ type ExpenseFormProps = PropsWithChildren<{
     autoFocus?: boolean;
     onSubmitSuccess?: () => void;
     fetcher: ReturnType<typeof useFetcher>;
+    defaultValues?: AddExpenseInputWithId;
 }>;
 
-export default function ExpenseForm({ autoFocus, children, fetcher, onSubmitSuccess }: ExpenseFormProps) {
+export default function ExpenseForm({
+    autoFocus,
+    children,
+    fetcher,
+    defaultValues,
+    onSubmitSuccess,
+}: ExpenseFormProps) {
+    const isUpdate = Boolean(defaultValues);
     const {
         handleSubmit,
         control,
@@ -25,12 +34,9 @@ export default function ExpenseForm({ autoFocus, children, fetcher, onSubmitSucc
     } = useRemixForm<AddExpenseInput>({
         resolver: zodResolver(addExpenseSchema),
         fetcher,
-        defaultValues: {
-            amount: 0,
-            description: '',
-        },
+        defaultValues: isUpdate ? defaultValues : { amount: 0, description: '', intent: 'create' },
         submitData: {
-            id: uuidv4(),
+            id: isUpdate ? defaultValues?.id : uuidv4(),
         },
         submitConfig: {
             method: 'POST',
@@ -51,8 +57,6 @@ export default function ExpenseForm({ autoFocus, children, fetcher, onSubmitSucc
             onSubmitSuccess?.();
         }
     }, [isSubmitting, isSubmitSuccessful, onSubmitSuccess]);
-
-    useEffect(() => () => console.log('unmounting'), []);
 
     return (
         <form onSubmit={handleSubmit}>
