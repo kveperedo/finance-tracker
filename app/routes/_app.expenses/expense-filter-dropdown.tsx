@@ -20,7 +20,7 @@ export default function ExpenseFilterDropdown() {
     return (
         <>
             <Button
-                className="whitespace-nowrap"
+                className="whitespace-nowrap shadow-sm"
                 ref={triggerRef}
                 onPress={() => setIsPopoverOpen(true)}
                 variant="outline"

@@ -29,7 +29,7 @@ export default function MonthlySavingsPanel() {
     const isEmptyIncome = monthlyIncome === null || !savingsSummary;
 
     return (
-        <div className="flex flex-col rounded border border-stone-300 bg-white">
+        <div className="flex flex-col rounded border border-stone-300 bg-white shadow-sm">
             <div className="flex flex-1 items-center justify-between border-b border-stone-300 p-4">
                 <p className="text-sm font-medium">Savings</p>
             </div>

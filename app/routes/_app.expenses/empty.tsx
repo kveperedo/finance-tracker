@@ -21,7 +21,7 @@ export function EmptySearchExpenses() {
                 variant="outline"
                 className="mt-2"
                 onPress={() => {
-                    actions.deleteParam('month', 'year');
+                    actions.deleteParam('q');
                 }}
             >
                 Clear search
