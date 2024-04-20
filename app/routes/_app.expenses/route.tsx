@@ -123,7 +123,7 @@ export default function ExpensesPage() {
                 </div>
             </main>
             <aside className="my-4 -mr-2 hidden w-96 flex-col gap-4 overflow-auto pr-3 sm:flex">
-                <div className="rounded border border-stone-300 bg-white">
+                <div className="rounded border border-stone-300 bg-white shadow-sm">
                     <div className="border-b border-stone-300 p-4">
                         <p className="text-sm font-medium">Add expenses</p>
                     </div>
