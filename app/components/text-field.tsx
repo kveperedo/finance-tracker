@@ -9,14 +9,15 @@ type TextFieldProps = AriaTextFieldProps & {
     label?: string;
     description?: string;
     errorMessage?: string;
+    placeholder?: string;
 };
 
 const TextField = forwardRef<HTMLInputElement, TextFieldProps>(
-    ({ label, description, errorMessage, ...props }, ref) => {
+    ({ label, description, errorMessage, placeholder, ...props }, ref) => {
         return (
             <AriaTextField {...props} className={cn('flex flex-col items-start', props.className)}>
-                <Label>{label}</Label>
-                <Input ref={ref} />
+                {label && <Label>{label}</Label>}
+                <Input ref={ref} placeholder={placeholder} />
                 {description && <Text slot="description">{description}</Text>}
                 <FieldError className="mt-1 text-xs text-red-600">{errorMessage}</FieldError>
             </AriaTextField>

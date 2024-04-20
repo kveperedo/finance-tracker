@@ -3,8 +3,8 @@ import type { GetExpensesReturnType } from './queries';
 import { format } from 'date-fns';
 import { cn, numberFormatter } from '~/utils';
 import { forwardRef } from 'react';
-import { useSearchParams } from '@remix-run/react';
 import { EmptyExpenses, EmptySearchExpenses } from './empty';
+import useExpenseSearchParams from './hooks/useExpenseSearchParams';
 
 type ExpenseListProps = {
     pendingExpenseId?: string;
@@ -12,8 +12,8 @@ type ExpenseListProps = {
 };
 
 const ExpensesList = forwardRef<HTMLDivElement, ExpenseListProps>(({ expenses, pendingExpenseId }, ref) => {
-    const [searchParams] = useSearchParams();
-    const search = searchParams.get('q') ?? '';
+    const [{ q }] = useExpenseSearchParams();
+    const search = q ?? '';
 
     return (
         <GridList

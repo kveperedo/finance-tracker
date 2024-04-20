@@ -1,12 +1,12 @@
-import { useSearchParams } from '@remix-run/react';
 import { CircleX, Search } from 'lucide-react';
 import { SearchField } from 'react-aria-components';
 import Button from '~/components/button';
 import Input from '~/components/input';
+import useExpenseSearchParams from './hooks/useExpenseSearchParams';
 
 export default function ExpenseSearchField() {
-    const [searchParams, setSearchParams] = useSearchParams();
-    const search = searchParams.get('q') ?? '';
+    const [{ q }, actions] = useExpenseSearchParams();
+    const search = q ?? '';
 
     return (
         <SearchField
@@ -15,17 +15,10 @@ export default function ExpenseSearchField() {
             className="group relative flex max-w-60 flex-1 items-center"
             defaultValue={search}
             onSubmit={(newSearch) => {
-                setSearchParams((searchParams) => {
-                    searchParams.set('q', newSearch.toLowerCase());
-                    return searchParams;
-                });
+                actions.setParam('q', newSearch.toLowerCase());
             }}
             onClear={() => {
-                setSearchParams((searchParams) => {
-                    // eslint-disable-next-line drizzle/enforce-delete-with-where
-                    searchParams.delete('q');
-                    return searchParams;
-                });
+                actions.deleteParam('q');
             }}
         >
             <Search className="absolute left-0 ml-3 text-stone-500" size={16} />

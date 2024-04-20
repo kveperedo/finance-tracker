@@ -7,7 +7,7 @@ export const addExpenseSchema = createInsertSchema(expenses, {
         .string({
             required_error: 'Description is required',
         })
-        .min(1, { message: 'Description should not be empty' }),
+        .min(1, { message: 'Description is required' }),
     amount: z
         .number({
             required_error: 'Amount is required',

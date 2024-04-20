@@ -1,26 +1,22 @@
 import { useFetcher, useLoaderData } from '@remix-run/react';
-import { json, redirect } from '@vercel/remix';
+import { redirect } from '@vercel/remix';
 import type { ExpenseParams } from './queries';
-import { addExpense, getExpenses, getMonthlyExpenses } from './queries';
+import { getExpenses, getMonthlyExpenses, getSavingsSummary, getUserMonthlyIncome } from './queries';
 import AddExpenseModal from './add-expense-modal';
-import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from '@vercel/remix';
-import type { AddExpenseInput } from './schema';
-import { addExpenseSchema } from './schema';
-import { v4 as uuidv4 } from 'uuid';
-import { z } from 'zod';
-import { getValidatedFormData, useRemixForm } from 'remix-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import type { LoaderFunctionArgs, MetaFunction } from '@vercel/remix';
 import { getUserId } from '~/auth/session.server';
 import { generateFormData } from '~/lib/remix-hook-form';
 import { numberFormatter } from '~/utils';
 import ExpenseFilterDropdown from './expense-filter-dropdown';
-import { useEffect, useMemo, useRef } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import type { MonthKey } from './constants';
 import { MONTHS } from './constants';
 import ExpensesList from './expenses-list';
 import Button from '~/components/button';
-import ExpenseForm from './expense-form';
+import ExpenseForm, { EXPENSE_FETCHER_KEY } from '../resources.expenses/expense-form';
 import ExpenseSearchField from './expense-search-field';
+import MonthlySavingsPanel from './monthly-savings-panel';
+import type { AddExpenseInput } from '../resources.expenses/schema';
 
 export const meta: MetaFunction = ({ location }) => {
     const searchParams = new URLSearchParams(location.search);
@@ -35,36 +31,6 @@ export const meta: MetaFunction = ({ location }) => {
         },
     ];
 };
-
-const addExpenseSchemaWithId = addExpenseSchema.extend({
-    id: z.string().uuid(),
-});
-type AddExpenseInputWithId = z.infer<typeof addExpenseSchemaWithId>;
-
-export async function action({ request }: ActionFunctionArgs) {
-    try {
-        const { data, errors } = await getValidatedFormData<AddExpenseInputWithId>(
-            request,
-            zodResolver(addExpenseSchemaWithId)
-        );
-
-        if (errors) {
-            return json({ error: 'Invalid request' }, { status: 400 });
-        }
-
-        const userId = await getUserId(request);
-        if (!userId) {
-            return redirect('/login');
-        }
-
-        const result = await addExpense({ ...data, userId });
-
-        return { ok: true, data: result };
-    } catch (error) {
-        console.error(error);
-        return { ok: false, error: 'Something went wrong' };
-    }
-}
 
 export async function loader({ request }: LoaderFunctionArgs) {
     const userId = await getUserId(request);
@@ -84,44 +50,20 @@ export async function loader({ request }: LoaderFunctionArgs) {
         search: search ?? undefined,
     };
 
-    const [expenses, monthlyExpenses] = await Promise.all([getExpenses(params), getMonthlyExpenses(params)]);
+    const [expenses, monthlyExpenses, monthlyIncome, savingsSummary] = await Promise.all([
+        getExpenses(params),
+        getMonthlyExpenses(params),
+        getUserMonthlyIncome(userId),
+        getSavingsSummary(params),
+    ]);
 
-    return { expenses, monthlyExpenses };
+    return { expenses, monthlyExpenses, monthlyIncome, savingsSummary };
 }
 
 export default function ExpensesPage() {
     const { expenses, monthlyExpenses } = useLoaderData<typeof loader>();
     const gridRef = useRef<HTMLDivElement>(null);
-    const fetcher = useFetcher<typeof action>();
-    const formMethods = useRemixForm<AddExpenseInput>({
-        resolver: zodResolver(addExpenseSchema),
-        submitData: {
-            id: uuidv4(),
-        },
-        defaultValues: {
-            description: '',
-            amount: 0,
-        },
-        fetcher,
-    });
-    const {
-        formState: { isSubmitting, isSubmitSuccessful },
-        handleSubmit,
-        reset,
-    } = formMethods;
-
-    useEffect(() => {
-        if (isSubmitSuccessful) {
-            reset();
-        }
-    }, [isSubmitting, isSubmitSuccessful, reset]);
-
-    useEffect(() => {
-        if (isSubmitSuccessful) {
-            gridRef.current?.scrollTo({ top: 0 });
-        }
-    }, [isSubmitting, isSubmitSuccessful]);
-
+    const fetcher = useFetcher({ key: EXPENSE_FETCHER_KEY });
     const pendingExpense = fetcher.formData
         ? (generateFormData(fetcher.formData) as AddExpenseInput & { id: string })
         : null;
@@ -150,17 +92,24 @@ export default function ExpensesPage() {
             : transformedExpenses;
     }, [expenses, pendingExpense]);
 
+    const handleSubmit = useCallback(() => {
+        gridRef.current?.scrollTo({ top: 0 });
+    }, []);
+
     return (
         <div className="container mx-auto flex min-h-0 w-full flex-1 gap-4">
             <main className="flex flex-1 flex-col">
-                <div className="flex items-center justify-between gap-4 px-4 py-4 sm:px-0">
-                    <ExpenseFilterDropdown />
-                    <div className="block sm:hidden">
-                        <AddExpenseModal formMethods={formMethods} />
+                <div className="m-4 flex min-h-0 flex-1 flex-col rounded border border-stone-300 bg-white px-0 shadow-sm sm:mx-0">
+                    <div className="flex items-center justify-between gap-4 border-b border-stone-300 p-4">
+                        <p className="text-sm font-medium">Expenses this month</p>
+                        <div className="ml-auto">
+                            <ExpenseFilterDropdown />
+                        </div>
+                        <div className="block sm:hidden">
+                            <AddExpenseModal />
+                        </div>
                     </div>
-                </div>
 
-                <div className="mx-4 mb-4 flex min-h-0 flex-1 flex-col rounded border border-stone-300 bg-white px-0 shadow-sm sm:mx-0">
                     <ExpensesList ref={gridRef} expenses={expensesToDisplay} pendingExpenseId={pendingExpense?.id} />
 
                     <div className="flex items-center justify-between gap-4 border-t border-stone-200 p-4">
@@ -173,17 +122,20 @@ export default function ExpensesPage() {
                     </div>
                 </div>
             </main>
-            <aside className="hidden w-96 sm:block">
-                <div className="mt-[72px] rounded border border-stone-300 bg-white">
-                    <p className="border-b border-stone-300 p-4 text-lg font-bold text-stone-700">Add Expenses</p>
-                    <div className="p-8">
-                        <ExpenseForm formMethods={formMethods} onSubmit={handleSubmit}>
+            <aside className="my-4 hidden w-96 flex-col gap-4 sm:flex">
+                <div className="rounded border border-stone-300 bg-white">
+                    <div className="border-b border-stone-300 p-4">
+                        <p className="text-sm font-medium">Add expenses</p>
+                    </div>
+                    <div className="p-4">
+                        <ExpenseForm fetcher={fetcher} onSubmitSuccess={handleSubmit}>
                             <Button className="mt-8 w-full" type="submit">
                                 Submit
                             </Button>
                         </ExpenseForm>
                     </div>
                 </div>
+                <MonthlySavingsPanel />
             </aside>
         </div>
     );
