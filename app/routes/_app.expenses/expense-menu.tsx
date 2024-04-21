@@ -1,5 +1,5 @@
 import { useFetcher } from '@remix-run/react';
-import { Ellipsis, PencilLine, Trash } from 'lucide-react';
+import { EllipsisVertical, PencilLine, Trash } from 'lucide-react';
 import { useState } from 'react';
 import { Menu, MenuTrigger } from 'react-aria-components';
 import AlertDialog from '~/components/alert-dialog';
@@ -8,7 +8,7 @@ import { MenuItem } from '~/components/item';
 import Popover from '~/components/popover';
 import type { DeleteExpenseInput } from '../resources.expenses/schema';
 import Modal from '~/components/modal';
-import ExpenseForm from '../resources.expenses/expense-form';
+import ExpenseForm, { FETCHER_KEY } from '../resources.expenses/expense-form';
 import type { GetExpensesReturnType } from './queries';
 
 type Intent = 'update' | 'delete' | null;
@@ -19,14 +19,20 @@ type ExpenseMenuProps = {
 };
 
 export default function ExpenseMenu({ expense, isPendingExpense }: ExpenseMenuProps) {
-    const fetcher = useFetcher();
+    const updateFetcher = useFetcher({ key: FETCHER_KEY.UPDATE });
+    const deleteFetcher = useFetcher({ key: FETCHER_KEY.DELETE });
     const [intent, setIntent] = useState<Intent>(null);
 
     return (
         <>
             <MenuTrigger>
-                <Button variant="tertiary" size="icon-sm" isDisabled={isPendingExpense}>
-                    <Ellipsis size={16} />
+                <Button
+                    className="text-stone-400 hover:text-stone-800 focus:text-stone-800"
+                    variant="tertiary"
+                    size="icon-sm"
+                    isDisabled={isPendingExpense}
+                >
+                    <EllipsisVertical size={16} />
                 </Button>
                 <Popover className="w-32" placement="bottom end">
                     <Menu className="p-2 text-sm outline-none" onAction={(id) => setIntent(id as Intent)}>
@@ -34,7 +40,7 @@ export default function ExpenseMenu({ expense, isPendingExpense }: ExpenseMenuPr
                             <PencilLine className="mr-3" size={16} />
                             Edit
                         </MenuItem>
-                        <MenuItem id="delete" textValue="delete">
+                        <MenuItem className="text-red-500 focus:bg-red-50" id="delete" textValue="delete">
                             <Trash className="mr-3" size={16} />
                             Delete
                         </MenuItem>
@@ -48,7 +54,7 @@ export default function ExpenseMenu({ expense, isPendingExpense }: ExpenseMenuPr
                 message="Are you sure you want to delete this expense?"
                 confirmLabel="Delete"
                 onConfirm={() => {
-                    fetcher.submit({ id: expense.id, intent: 'delete' } as DeleteExpenseInput, {
+                    deleteFetcher.submit({ id: expense.id, intent: 'delete' } as DeleteExpenseInput, {
                         method: 'POST',
                         action: '/resources/expenses',
                     });
@@ -57,7 +63,7 @@ export default function ExpenseMenu({ expense, isPendingExpense }: ExpenseMenuPr
             <Modal title="Update Expense" isOpen={intent === 'update'} onOpenChange={() => setIntent(null)}>
                 {({ state: { close } }) => (
                     <ExpenseForm
-                        fetcher={fetcher}
+                        fetcher={updateFetcher}
                         autoFocus
                         defaultValues={{ ...expense, amount: parseFloat(expense.amount), intent: 'update' }}
                         onSubmitSuccess={close}

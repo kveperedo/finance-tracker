@@ -9,7 +9,11 @@ import type { useFetcher } from '@remix-run/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { v4 as uuidv4 } from 'uuid';
 
-export const EXPENSE_FETCHER_KEY = 'add-expense-fetcher';
+export const FETCHER_KEY = {
+    ADD: 'add-expense-fetcher',
+    UPDATE: 'update-expense-fetcher',
+    DELETE: 'delete-expense-fetcher',
+};
 
 type ExpenseFormProps = PropsWithChildren<{
     autoFocus?: boolean;

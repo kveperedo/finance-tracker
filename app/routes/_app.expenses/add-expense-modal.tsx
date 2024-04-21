@@ -2,13 +2,13 @@ import { ListPlus } from 'lucide-react';
 import { DialogTrigger } from 'react-aria-components';
 import { useCallback, useState } from 'react';
 import Button from '~/components/button';
-import ExpenseForm, { EXPENSE_FETCHER_KEY } from '../resources.expenses/expense-form';
+import ExpenseForm, { FETCHER_KEY } from '../resources.expenses/expense-form';
 import { useFetcher } from '@remix-run/react';
 import Modal from '~/components/modal';
 
 export default function AddExpenseModal() {
     const [isOpen, setIsOpen] = useState(false);
-    const fetcher = useFetcher({ key: EXPENSE_FETCHER_KEY });
+    const fetcher = useFetcher({ key: FETCHER_KEY.ADD });
 
     const handleSubmitSuccess = useCallback(() => {
         setIsOpen(false);
