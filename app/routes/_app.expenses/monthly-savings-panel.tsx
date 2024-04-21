@@ -1,4 +1,4 @@
-import { useFetcher, useLoaderData } from '@remix-run/react';
+import { useLoaderData } from '@remix-run/react';
 import { cn, numberFormatter } from '~/utils';
 import { ResponsiveContainer, BarChart, Bar, XAxis, CartesianGrid, LabelList, Cell, Text } from 'recharts';
 import type { MonthKey } from './constants';
@@ -10,9 +10,10 @@ import { Dialog, DialogTrigger } from 'react-aria-components';
 import Button from '~/components/button';
 import { Ellipsis } from 'lucide-react';
 import Popover from '~/components/popover';
+import { useFetcherWithReset } from '~/hooks/useFetcherWithReset';
 
 function EmptyMonthlyIncome() {
-    const fetcher = useFetcher();
+    const fetcher = useFetcherWithReset();
 
     return (
         <div className="flex flex-col gap-4 p-4">
@@ -24,7 +25,7 @@ function EmptyMonthlyIncome() {
 
 export default function MonthlySavingsPanel() {
     const { monthlyIncome, monthlyExpenses, savingsSummary } = useLoaderData<typeof loader>();
-    const fetcher = useFetcher();
+    const fetcher = useFetcherWithReset();
     const [{ month, year }] = useExpenseSearchParams();
     const isEmptyIncome = monthlyIncome === null || !savingsSummary;
 
