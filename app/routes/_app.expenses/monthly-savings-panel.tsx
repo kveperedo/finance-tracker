@@ -1,4 +1,4 @@
-import { useFetcher, useLoaderData } from '@remix-run/react';
+import { useLoaderData } from '@remix-run/react';
 import { cn, numberFormatter } from '~/utils';
 import { ResponsiveContainer, BarChart, Bar, XAxis, CartesianGrid, LabelList, Cell, Text } from 'recharts';
 import type { MonthKey } from './constants';
@@ -10,9 +10,10 @@ import { Dialog, DialogTrigger } from 'react-aria-components';
 import Button from '~/components/button';
 import { Ellipsis } from 'lucide-react';
 import Popover from '~/components/popover';
+import { useFetcherWithReset } from '~/hooks/useFetcherWithReset';
 
 function EmptyMonthlyIncome() {
-    const fetcher = useFetcher();
+    const fetcher = useFetcherWithReset();
 
     return (
         <div className="flex flex-col gap-4 p-4">
@@ -24,7 +25,7 @@ function EmptyMonthlyIncome() {
 
 export default function MonthlySavingsPanel() {
     const { monthlyIncome, monthlyExpenses, savingsSummary } = useLoaderData<typeof loader>();
-    const fetcher = useFetcher();
+    const fetcher = useFetcherWithReset();
     const [{ month, year }] = useExpenseSearchParams();
     const isEmptyIncome = monthlyIncome === null || !savingsSummary;
 
@@ -37,42 +38,6 @@ export default function MonthlySavingsPanel() {
                 <EmptyMonthlyIncome />
             ) : (
                 <>
-                    <div className="flex justify-evenly p-4">
-                        <div className="ml-8">
-                            <p className="text-sm text-stone-600">Monthly savings</p>
-                            <p className="text-lg font-bold">
-                                <span className="text-sm font-light">PHP </span>
-                                {numberFormatter.format(monthlyIncome - monthlyExpenses)}
-                            </p>
-                        </div>
-                        <div>
-                            <p className="text-sm text-stone-600">Monthly income</p>
-                            <p className="text-lg font-bold">
-                                <span className="text-sm font-light">PHP </span>
-                                {numberFormatter.format(monthlyIncome)}
-                                <DialogTrigger>
-                                    <Button className="ml-1 inline-flex h-7 w-7" variant="tertiary" size="icon-sm">
-                                        <Ellipsis size={16} />
-                                    </Button>
-                                    <Popover showArrow placement="bottom end">
-                                        <Dialog aria-label="Update monthly income" className="w-72 p-4 outline-none">
-                                            {({ close }) => (
-                                                <div className="flex items-center gap-4">
-                                                    <MonthlyIncomeForm
-                                                        autoFocus
-                                                        fetcher={fetcher}
-                                                        defaultValue={monthlyIncome}
-                                                        onSubmitSuccess={close}
-                                                    />
-                                                </div>
-                                            )}
-                                        </Dialog>
-                                    </Popover>
-                                </DialogTrigger>
-                            </p>
-                        </div>
-                    </div>
-
                     <div className="h-64 p-4">
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart margin={{ top: 16 }} data={savingsSummary}>
@@ -111,6 +76,46 @@ export default function MonthlySavingsPanel() {
                                 </Bar>
                             </BarChart>
                         </ResponsiveContainer>
+                    </div>
+
+                    <div className="flex justify-evenly p-4 pt-0">
+                        <div className="ml-8">
+                            <p className="text-sm text-stone-600">Monthly savings</p>
+                            <p className="text-lg font-bold">
+                                <span className="text-sm font-light">PHP </span>
+                                {numberFormatter.format(monthlyIncome - monthlyExpenses)}
+                            </p>
+                        </div>
+                        <div>
+                            <p className="text-sm text-stone-600">Monthly income</p>
+                            <p className="text-lg font-bold">
+                                <span className="text-sm font-light">PHP </span>
+                                {numberFormatter.format(monthlyIncome)}
+                                <DialogTrigger>
+                                    <Button
+                                        className="ml-1 inline-flex h-7 w-7 text-stone-400 hover:text-stone-800 focus:text-stone-800"
+                                        variant="tertiary"
+                                        size="icon-sm"
+                                    >
+                                        <Ellipsis size={16} />
+                                    </Button>
+                                    <Popover showArrow placement="bottom end">
+                                        <Dialog aria-label="Update monthly income" className="w-72 p-4 outline-none">
+                                            {({ close }) => (
+                                                <div className="flex items-center gap-4">
+                                                    <MonthlyIncomeForm
+                                                        autoFocus
+                                                        fetcher={fetcher}
+                                                        defaultValue={monthlyIncome}
+                                                        onSubmitSuccess={close}
+                                                    />
+                                                </div>
+                                            )}
+                                        </Dialog>
+                                    </Popover>
+                                </DialogTrigger>
+                            </p>
+                        </div>
                     </div>
                 </>
             )}

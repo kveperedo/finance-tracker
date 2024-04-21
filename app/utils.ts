@@ -1,3 +1,4 @@
+import type { FetcherWithComponents } from '@remix-run/react';
 import { clsx, type ClassValue } from 'clsx';
 import { composeRenderProps } from 'react-aria-components';
 import { twMerge } from 'tailwind-merge';
@@ -27,4 +28,24 @@ export function composeTailwindRenderProps<T>(
     tw: string
 ): string | ((v: T) => string) {
     return composeRenderProps(className, (className) => twMerge(tw, className));
+}
+
+// Reference:
+// https://remix.run/docs/en/main/start/v2#usefetcher
+export function getFetcherStates<T>(fetcher: FetcherWithComponents<T>) {
+    const isInit = fetcher.state === 'idle' && fetcher.data == null;
+    const isDone = fetcher.state === 'idle' && fetcher.data != null;
+    const isActionSubmitting = fetcher.state === 'submitting';
+    const isActionLoading = fetcher.state === 'loading' && fetcher.formMethod != null && fetcher.formMethod != 'GET';
+    const isLoaderSubmitting = fetcher.state === 'loading' && fetcher.formMethod === 'GET';
+    const isNormalLoad = fetcher.state === 'loading' && fetcher.formMethod == null;
+
+    return {
+        isInit,
+        isDone,
+        isActionSubmitting,
+        isActionLoading,
+        isLoaderSubmitting,
+        isNormalLoad,
+    };
 }
