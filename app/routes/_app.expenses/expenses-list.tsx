@@ -111,7 +111,7 @@ function ExpenseItem({ expense, spring, springRef }: ExpenseItemProps) {
                 <animated.div
                     {...bind()}
                     className={cn(
-                        'absolute flex h-full w-full touch-none items-center justify-between bg-white px-4',
+                        'absolute flex h-full w-full touch-pan-y items-center justify-between bg-white px-4',
                         expense.isPending && 'bg-stone-100'
                     )}
                     style={{ x: spring.x }}
