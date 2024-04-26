@@ -4,8 +4,14 @@ import { FETCHER_KEY } from '~/routes/resources.expenses/expense-form';
 import { useMemo } from 'react';
 import { generateFormData } from '~/lib/remix-hook-form';
 import type { AddExpenseInputWithId, DeleteExpenseInput } from '~/routes/resources.expenses/schema';
+import type { GetExpensesReturnType } from '../queries';
 
-export default function useDisplayedExpenses() {
+type DisplayExpense = GetExpensesReturnType[number] & {
+    isPending: boolean;
+    index: number;
+};
+
+export default function useDisplayedExpenses(): Array<DisplayExpense> {
     const { expenses } = useLoaderData<typeof loader>();
 
     const fetchers = useFetchers();
@@ -31,15 +37,16 @@ export default function useDisplayedExpenses() {
 
     const expensesToDisplay = useMemo(() => {
         if (!pendingAddExpense && !pendingUpdateExpense && !pendingDeleteExpense) {
-            return expenses.map((expense) => ({
+            return expenses.map((expense, index) => ({
                 ...expense,
                 createdAt: new Date(expense.createdAt),
                 updatedAt: new Date(expense.updatedAt),
                 isPending: false,
+                index,
             }));
         }
 
-        const transformedExpenses = expenses.map((expense) => {
+        const optimisticUpdateDeleteExpenses = expenses.map((expense) => {
             if (pendingUpdateExpense && expense.id === pendingUpdateExpense.id) {
                 return {
                     ...pendingUpdateExpense,
@@ -58,9 +65,9 @@ export default function useDisplayedExpenses() {
             };
         });
 
-        type Expense = (typeof transformedExpenses)[number];
+        type Expense = (typeof optimisticUpdateDeleteExpenses)[number];
 
-        return pendingAddExpense
+        const optimisticCreateExpenses = pendingAddExpense
             ? [
                   {
                       ...pendingAddExpense,
@@ -69,9 +76,11 @@ export default function useDisplayedExpenses() {
                       updatedAt: new Date(),
                       isPending: true,
                   } as Expense,
-                  ...transformedExpenses,
+                  ...optimisticUpdateDeleteExpenses,
               ]
-            : transformedExpenses;
+            : optimisticUpdateDeleteExpenses;
+
+        return optimisticCreateExpenses.map((expense, index) => ({ ...expense, index }));
     }, [expenses, pendingAddExpense, pendingDeleteExpense, pendingUpdateExpense]);
 
     return expensesToDisplay;
