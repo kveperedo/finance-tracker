@@ -12,6 +12,7 @@ import { useRemixForm, getValidatedFormData } from 'remix-hook-form';
 import { Form, Link, useActionData, useNavigation } from '@remix-run/react';
 import { useEffect, useState } from 'react';
 import ModalContainer from '~/components/modal-container';
+import { withDelay } from '~/utils.server';
 
 type ServerError = { errorType: 'invalidCredentials' };
 const isServerError = (actionData: SerializeFrom<typeof action>): actionData is ServerError => {
@@ -38,10 +39,12 @@ export async function action({ request }: ActionFunctionArgs) {
         return json({ errors, defaultValues }, { status: 400 });
     }
 
-    const user = await login({
-        email: data.email,
-        password: data.passwordHash,
-    });
+    const user = await withDelay(
+        login({
+            email: data.email,
+            password: data.passwordHash,
+        })
+    );
     if (!user) {
         return json({ errorType: 'invalidCredentials' } as const, {
             status: 401,
