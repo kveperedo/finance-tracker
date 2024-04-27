@@ -4,10 +4,11 @@ import { Button as AriaButton, composeRenderProps } from 'react-aria-components'
 import { focusRing } from '~/utils';
 import type { VariantProps } from 'tailwind-variants';
 import { tv } from 'tailwind-variants';
+import { Loader } from 'lucide-react';
 
 const buttonStyles = tv({
     extend: focusRing,
-    base: 'apply-focus flex items-center justify-center gap-2 rounded text-sm transition-colors',
+    base: 'apply-focus relative flex items-center justify-center gap-2 rounded text-sm transition-colors',
     variants: {
         variant: {
             primary: 'bg-stone-800 text-stone-100 shadow-sm hover:bg-stone-700 pressed:bg-stone-900',
@@ -33,22 +34,29 @@ type ButtonVariants = Omit<VariantProps<typeof buttonStyles>, 'isFocusVisible'>;
 
 type ButtonProps = Omit<AriaButtonProps, 'children'> &
     PropsWithChildren<{
+        isLoading?: boolean;
         leftIcon?: React.ReactNode;
         rightIcon?: React.ReactNode;
     }> &
     ButtonVariants;
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-    ({ leftIcon, rightIcon, children, variant, size, ...props }, ref) => {
+    ({ leftIcon, rightIcon, children, variant, size, isLoading, ...props }, ref) => {
         return (
             <AriaButton
                 ref={ref}
                 {...props}
+                isDisabled={isLoading || props.isDisabled}
                 className={composeRenderProps(props.className, (className, renderProps) =>
                     buttonStyles({ ...renderProps, variant, size, className })
                 )}
             >
                 {leftIcon}
+                {isLoading && (
+                    <div className="absolute flex h-full w-full items-center justify-center bg-stone-100">
+                        <Loader className="animate-spin" size={16} />
+                    </div>
+                )}
                 {children}
                 {rightIcon}
             </AriaButton>
