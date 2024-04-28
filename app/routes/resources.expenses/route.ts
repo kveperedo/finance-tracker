@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { requireUserId } from '~/auth/session.server';
 import { addExpense, deleteExpense, updateExpense } from './queries';
 import { generateFormData } from '~/lib/remix-hook-form';
+import { withDelay } from '~/utils.server';
 
 const invalidRequest = () => json({ error: 'Invalid request' }, { status: 400 });
 
@@ -48,7 +49,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
             return invalidRequest();
         }
 
-        return performExpenseAction({ formData, intent: intentData.intent, userId });
+        return withDelay(performExpenseAction({ formData, intent: intentData.intent, userId }));
     } catch (error) {
         console.error(error);
         return { ok: false, error: 'Something went wrong' };

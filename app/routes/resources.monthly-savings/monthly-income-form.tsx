@@ -38,13 +38,6 @@ export default function MonthlyIncomeForm({
     const { isActionSubmitting, isActionLoading, isDone: isSubmitSuccessful } = getFetcherStates(fetcher);
     const isLoading = isActionSubmitting || isActionLoading;
 
-    let buttonActionText;
-    if (defaultValue) {
-        buttonActionText = isLoading ? 'Updating' : 'Update';
-    } else {
-        buttonActionText = isLoading ? 'Saving' : 'Save';
-    }
-
     useEffect(() => {
         if (isSubmitSuccessful) {
             onSubmitSuccess?.();
@@ -81,8 +74,8 @@ export default function MonthlyIncomeForm({
                     />
                 )}
             />
-            <Button variant="secondary" type="submit" isDisabled={isLoading}>
-                {buttonActionText} income
+            <Button variant="secondary" type="submit" isLoading={isLoading}>
+                {defaultValue ? 'Update' : 'Save'} income
             </Button>
         </form>
     );
