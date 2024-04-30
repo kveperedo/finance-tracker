@@ -7,7 +7,6 @@ import type { LoaderFunctionArgs, MetaFunction } from '@vercel/remix';
 import { getUserId } from '~/auth/session.server';
 import { numberFormatter } from '~/utils';
 import ExpenseFilterDropdown from './expense-filter-dropdown';
-import { useCallback, useRef } from 'react';
 import type { MonthKey } from './constants';
 import { MONTHS } from './constants';
 import ExpensesList from './expenses-list';
@@ -60,12 +59,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export default function ExpensesPage() {
     const { monthlyExpenses } = useLoaderData<typeof loader>();
-    const gridRef = useRef<HTMLDivElement>(null);
     const fetcher = useFetcher({ key: FETCHER_KEY.ADD });
-
-    const handleSubmit = useCallback(() => {
-        gridRef.current?.scrollTo({ top: 0 });
-    }, []);
 
     return (
         <div className="container mx-auto flex min-h-0 w-full flex-1 gap-4">
@@ -81,7 +75,7 @@ export default function ExpensesPage() {
                         </div>
                     </div>
 
-                    <ExpensesList ref={gridRef} />
+                    <ExpensesList />
 
                     <div className="flex items-center justify-between gap-4 border-t border-stone-200 p-4">
                         <ExpenseSearchField />
@@ -99,7 +93,7 @@ export default function ExpensesPage() {
                         <p className="text-sm font-medium">Add expenses</p>
                     </div>
                     <div className="p-4">
-                        <ExpenseForm fetcher={fetcher} onSubmitSuccess={handleSubmit}>
+                        <ExpenseForm fetcher={fetcher}>
                             <Button className="mt-8 w-full" type="submit">
                                 Submit
                             </Button>
