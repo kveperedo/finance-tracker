@@ -6,10 +6,10 @@ import { and, eq } from 'drizzle-orm';
 
 type ExpenseParams = Omit<AddExpenseInput, 'intent'> & WithUserId<{ id: string }>;
 
-export async function addExpense({ amount, description, id, userId }: ExpenseParams) {
+export async function addExpense({ amount, description, id, userId, date }: ExpenseParams) {
     const [result] = await db
         .insert(expenses)
-        .values({ id, description, amount: String(amount), userId })
+        .values({ id, description, amount: String(amount), userId, createdAt: date, updatedAt: date })
         .returning();
 
     return result;
@@ -25,7 +25,7 @@ export async function updateExpense(params: ExpenseParams) {
         .set({
             ...params,
             amount: String(params.amount),
-            updatedAt: new Date(),
+            updatedAt: params.date,
         })
         .where(eq(expenses.id, params.id));
 }

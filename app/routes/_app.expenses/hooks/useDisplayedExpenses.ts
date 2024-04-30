@@ -5,6 +5,11 @@ import { useMemo } from 'react';
 import { generateFormData } from '~/lib/remix-hook-form';
 import type { AddExpenseInputWithId, DeleteExpenseInput } from '~/routes/resources.expenses/schema';
 import type { GetExpensesReturnType } from '../queries';
+import useExpenseSearchParams from './useExpenseSearchParams';
+import { getMonth } from '~/utils';
+import { getYear } from 'date-fns';
+
+type ExpenseFetcherFormData = Omit<AddExpenseInputWithId, 'date'> & { date: string };
 
 type DisplayExpense = GetExpensesReturnType[number] & {
     isPending: boolean;
@@ -13,6 +18,7 @@ type DisplayExpense = GetExpensesReturnType[number] & {
 
 export default function useDisplayedExpenses(): Array<DisplayExpense> {
     const { expenses } = useLoaderData<typeof loader>();
+    const [searchParams] = useExpenseSearchParams();
 
     const fetchers = useFetchers();
     const expenseFetchers = fetchers.filter(({ key }) =>
@@ -23,11 +29,12 @@ export default function useDisplayedExpenses(): Array<DisplayExpense> {
     const deleteFetcher = expenseFetchers.find(({ key }) => key === FETCHER_KEY.DELETE);
 
     const pendingAddExpense = useMemo(
-        () => (addFetcher?.formData ? (generateFormData(addFetcher.formData) as AddExpenseInputWithId) : null),
+        () => (addFetcher?.formData ? (generateFormData(addFetcher.formData) as ExpenseFetcherFormData) : null),
         [addFetcher]
     );
+
     const pendingUpdateExpense = useMemo(
-        () => (updateFetcher?.formData ? (generateFormData(updateFetcher.formData) as AddExpenseInputWithId) : null),
+        () => (updateFetcher?.formData ? (generateFormData(updateFetcher.formData) as ExpenseFetcherFormData) : null),
         [updateFetcher]
     );
     const pendingDeleteExpense = useMemo(
@@ -36,52 +43,72 @@ export default function useDisplayedExpenses(): Array<DisplayExpense> {
     );
 
     const expensesToDisplay = useMemo(() => {
-        if (!pendingAddExpense && !pendingUpdateExpense && !pendingDeleteExpense) {
+        if (pendingAddExpense) {
+            const month = getMonth(new Date(pendingAddExpense.date));
+            const year = getYear(new Date(pendingAddExpense.date));
+
+            if (searchParams.month !== month || searchParams.year !== year) {
+                return expenses.map((expense, index) => ({
+                    ...expense,
+                    createdAt: new Date(expense.createdAt),
+                    updatedAt: new Date(expense.updatedAt),
+                    isPending: false,
+                    index,
+                })) satisfies Array<DisplayExpense>;
+            }
+        } else if (!pendingAddExpense && !pendingUpdateExpense && !pendingDeleteExpense) {
             return expenses.map((expense, index) => ({
                 ...expense,
                 createdAt: new Date(expense.createdAt),
                 updatedAt: new Date(expense.updatedAt),
                 isPending: false,
                 index,
-            }));
+            })) satisfies Array<DisplayExpense>;
         }
 
-        const optimisticUpdateDeleteExpenses = expenses.map((expense) => {
+        const expensesWithPendingAdd = pendingAddExpense
+            ? [
+                  ...expenses,
+                  {
+                      ...pendingAddExpense,
+                      createdAt: new Date(pendingAddExpense.date),
+                      updatedAt: new Date(pendingAddExpense.date),
+                      amount: String(pendingAddExpense.amount),
+                  },
+              ]
+            : expenses;
+
+        const enrichedExpenses = expensesWithPendingAdd.map((expense) => {
             if (pendingUpdateExpense && expense.id === pendingUpdateExpense.id) {
                 return {
                     ...pendingUpdateExpense,
                     amount: String(pendingUpdateExpense.amount),
                     createdAt: new Date(expense.createdAt),
-                    updatedAt: new Date(),
+                    updatedAt: new Date(pendingUpdateExpense.date),
                     isPending: true,
                 };
             }
 
             return {
                 ...expense,
-                createdAt: new Date(expense.createdAt),
-                updatedAt: new Date(expense.updatedAt),
-                isPending: expense.id === pendingDeleteExpense?.id,
+                createdAt: new Date(expense.updatedAt!),
+                updatedAt: new Date(expense.updatedAt!),
+                isPending: expense.id === pendingDeleteExpense?.id || expense.id === pendingAddExpense?.id,
             };
         });
+        const sortedExpenses = enrichedExpenses.sort(
+            (a, b) => new Date(b.updatedAt!).getTime() - new Date(a.updatedAt!).getTime()
+        );
 
-        type Expense = (typeof optimisticUpdateDeleteExpenses)[number];
-
-        const optimisticCreateExpenses = pendingAddExpense
-            ? [
-                  {
-                      ...pendingAddExpense,
-                      amount: String(pendingAddExpense.amount),
-                      createdAt: new Date(),
-                      updatedAt: new Date(),
-                      isPending: true,
-                  } as Expense,
-                  ...optimisticUpdateDeleteExpenses,
-              ]
-            : optimisticUpdateDeleteExpenses;
-
-        return optimisticCreateExpenses.map((expense, index) => ({ ...expense, index }));
-    }, [expenses, pendingAddExpense, pendingDeleteExpense, pendingUpdateExpense]);
+        return sortedExpenses.map((expense, index) => ({ ...expense, index })) satisfies Array<DisplayExpense>;
+    }, [
+        expenses,
+        pendingAddExpense,
+        pendingDeleteExpense,
+        pendingUpdateExpense,
+        searchParams.month,
+        searchParams.year,
+    ]);
 
     return expensesToDisplay;
 }

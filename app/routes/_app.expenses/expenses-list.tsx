@@ -1,7 +1,7 @@
 import { GridList, GridListItem } from 'react-aria-components';
 import { format } from 'date-fns';
 import { cn, numberFormatter } from '~/utils';
-import { forwardRef, useState } from 'react';
+import { forwardRef, useEffect, useRef, useState } from 'react';
 import { EmptyExpenses, EmptySearchExpenses } from './empty';
 import useExpenseSearchParams from './hooks/useExpenseSearchParams';
 import ExpenseMenu from './expense-menu';
@@ -33,10 +33,20 @@ type ExpenseItemProps = {
 };
 
 function ExpenseItem({ expense, spring, springRef }: ExpenseItemProps) {
+    const containerRef = useRef<HTMLDivElement>(null);
     const { isSm } = useBreakpoint('sm');
     const [intent, setIntent] = useState<Intent>(null);
     const updateFetcher = useFetcher({ key: FETCHER_KEY.UPDATE });
     const deleteFetcher = useFetcher({ key: FETCHER_KEY.DELETE });
+
+    useEffect(() => {
+        if (expense.isPending) {
+            setTimeout(
+                () => containerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' }),
+                0
+            );
+        }
+    }, [expense.isPending]);
 
     const bind = useDrag(
         ({ offset: [offsetX], last, cancel }) => {
@@ -86,6 +96,7 @@ function ExpenseItem({ expense, spring, springRef }: ExpenseItemProps) {
 
     return (
         <GridListItem
+            ref={containerRef}
             className={({ isFocused }) => cn('border-b border-stone-100', isFocused && 'outline-none')}
             textValue={expense.description}
         >
@@ -118,7 +129,7 @@ function ExpenseItem({ expense, spring, springRef }: ExpenseItemProps) {
                 >
                     <div>
                         <p className="text-sm font-medium text-stone-950">{expense.description}</p>
-                        <p className="text-xs text-stone-400">{format(expense.createdAt, 'MMMM dd')}</p>
+                        <p className="text-xs text-stone-400">{format(expense.updatedAt, 'MMMM dd')}</p>
                     </div>
 
                     <div className="flex items-center gap-1">
@@ -152,7 +163,7 @@ function ExpenseItem({ expense, spring, springRef }: ExpenseItemProps) {
                     <ExpenseForm
                         fetcher={updateFetcher}
                         autoFocus
-                        defaultValues={{ ...expense, amount: parseFloat(expense.amount), intent: 'update' }}
+                        defaultValues={{ ...expense, amount: expense.amount, intent: 'update' }}
                         onSubmitSuccess={() => {
                             springRef.start({ x: MIN_X_POSITION, isOpen: false });
                             close();

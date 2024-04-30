@@ -1,5 +1,8 @@
+import { parseDateTime } from '@internationalized/date';
 import type { FetcherWithComponents } from '@remix-run/react';
 import { clsx, type ClassValue } from 'clsx';
+import { format } from 'date-fns';
+import type { DateValue } from 'react-aria-components';
 import { composeRenderProps } from 'react-aria-components';
 import { twMerge } from 'tailwind-merge';
 import { tv } from 'tailwind-variants';
@@ -48,4 +51,17 @@ export function getFetcherStates<T>(fetcher: FetcherWithComponents<T>) {
         isLoaderSubmitting,
         isNormalLoad,
     };
+}
+
+export const getMonth = (date: Date = new Date()) => date.getMonth() + 1;
+export const getYear = (date: Date = new Date()) => date.getFullYear();
+
+export function toAriaDateTime(date: Date) {
+    const formattedDateTime = format(date, "yyyy-MM-dd'T'HH:mm:ss");
+
+    return parseDateTime(formattedDateTime);
+}
+
+export function toNativeDate(dateValue: DateValue) {
+    return new Date(dateValue.toString());
 }

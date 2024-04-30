@@ -3,9 +3,8 @@ import db from '~/db';
 import { expenses, userDetails } from '~/db/schema';
 import { startOfMonth, endOfMonth, sub, add } from 'date-fns';
 import type { WithUserId } from '~/auth/types';
+import { getMonth, getYear } from '~/utils';
 
-const getMonth = (date: Date = new Date()) => date.getMonth() + 1;
-const getYear = (date: Date = new Date()) => date.getFullYear();
 const getDate = (month: number, year: number) => new Date(year, month - 1);
 
 function getFirstAndEndOfMonth({ month = getMonth(), year = getYear() }: Omit<ExpenseParams, 'userId'>) {
@@ -37,11 +36,11 @@ export function getExpenses({ userId, month, year, search }: ExpenseParams) {
         .where(
             and(
                 eq(expenses.userId, userId),
-                between(expenses.createdAt, startDate, endDate),
+                between(expenses.updatedAt, startDate, endDate),
                 search ? ilike(expenses.description, `%${search}%`) : undefined
             )
         )
-        .orderBy(desc(expenses.createdAt));
+        .orderBy(desc(expenses.updatedAt));
 }
 
 export type GetExpensesReturnType = Awaited<ReturnType<typeof getExpenses>>;

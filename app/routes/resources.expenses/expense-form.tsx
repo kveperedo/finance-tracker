@@ -1,5 +1,5 @@
 import { useRemixForm } from 'remix-hook-form';
-import type { AddExpenseInputWithId, AddExpenseInput } from './schema';
+import type { AddExpenseInput } from './schema';
 import { addExpenseSchema } from './schema';
 import { Controller } from 'react-hook-form';
 import NumberField from '~/components/number-field';
@@ -8,6 +8,18 @@ import { useEffect, useRef, type PropsWithChildren } from 'react';
 import type { useFetcher } from '@remix-run/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { v4 as uuidv4 } from 'uuid';
+import DatePicker from '~/components/date-picker';
+import { toAriaDateTime, toNativeDate } from '~/utils';
+import type { Expense } from '~/db/types';
+
+const generateDefaultValues = (): AddExpenseInput => {
+    return {
+        date: new Date(),
+        amount: 0,
+        description: '',
+        intent: 'create',
+    };
+};
 
 export const FETCHER_KEY = {
     ADD: 'add-expense-fetcher',
@@ -15,11 +27,13 @@ export const FETCHER_KEY = {
     DELETE: 'delete-expense-fetcher',
 };
 
+type DefaultValues = Omit<Expense, 'userId'> & { intent: AddExpenseInput['intent'] };
+
 type ExpenseFormProps = PropsWithChildren<{
     autoFocus?: boolean;
     onSubmitSuccess?: () => void;
     fetcher: ReturnType<typeof useFetcher>;
-    defaultValues?: AddExpenseInputWithId;
+    defaultValues?: DefaultValues;
 }>;
 
 export default function ExpenseForm({
@@ -38,7 +52,9 @@ export default function ExpenseForm({
     } = useRemixForm<AddExpenseInput>({
         resolver: zodResolver(addExpenseSchema),
         fetcher,
-        defaultValues: isUpdate ? defaultValues : { amount: 0, description: '', intent: 'create' },
+        defaultValues: isUpdate
+            ? { ...defaultValues, date: defaultValues?.updatedAt, amount: parseInt(defaultValues?.amount ?? '0') }
+            : generateDefaultValues(),
         submitData: {
             id: isUpdate ? defaultValues?.id : uuidv4(),
         },
@@ -51,7 +67,7 @@ export default function ExpenseForm({
 
     useEffect(() => {
         if (isSubmitSuccessful) {
-            reset();
+            reset(generateDefaultValues());
             numberFieldRef.current?.focus();
         }
     }, [isSubmitting, isSubmitSuccessful, reset]);
@@ -65,6 +81,20 @@ export default function ExpenseForm({
     return (
         <form onSubmit={handleSubmit}>
             <div className="flex flex-col gap-4">
+                <Controller
+                    control={control}
+                    name="date"
+                    render={({ field, fieldState: { error } }) => (
+                        <DatePicker
+                            label="Date"
+                            {...field}
+                            value={toAriaDateTime(field.value ?? new Date())}
+                            onChange={(value) => field.onChange(toNativeDate(value))}
+                            isInvalid={!!error?.message}
+                            errorMessage={error?.message}
+                        />
+                    )}
+                />
                 <Controller
                     control={control}
                     name="amount"
