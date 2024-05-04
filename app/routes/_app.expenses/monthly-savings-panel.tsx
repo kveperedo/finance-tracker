@@ -11,6 +11,8 @@ import Button from '~/components/button';
 import { Ellipsis } from 'lucide-react';
 import Popover from '~/components/popover';
 import { useFetcherWithReset } from '~/hooks/useFetcherWithReset';
+import type { AccordionPanelProps } from '../../components/accordion-panel';
+import AccordionPanel from '../../components/accordion-panel';
 
 function EmptyMonthlyIncome() {
     const fetcher = useFetcherWithReset();
@@ -23,17 +25,14 @@ function EmptyMonthlyIncome() {
     );
 }
 
-export default function MonthlySavingsPanel() {
+export default function MonthlySavingsPanel(props: Pick<AccordionPanelProps, 'isOpen' | 'onToggle'>) {
     const { monthlyIncome, monthlyExpenses, savingsSummary } = useLoaderData<typeof loader>();
     const fetcher = useFetcherWithReset();
     const [{ month, year }] = useExpenseSearchParams();
     const isEmptyIncome = monthlyIncome === null || !savingsSummary;
 
     return (
-        <div className="flex flex-col rounded border border-stone-300 bg-white shadow-sm">
-            <div className="flex flex-1 items-center justify-between border-b border-stone-300 p-4">
-                <p className="text-sm font-medium">Savings</p>
-            </div>
+        <AccordionPanel title="Savings" {...props}>
             {isEmptyIncome ? (
                 <EmptyMonthlyIncome />
             ) : (
@@ -43,7 +42,7 @@ export default function MonthlySavingsPanel() {
                             <BarChart margin={{ top: 16 }} data={savingsSummary}>
                                 <CartesianGrid className="stroke-stone-100" vertical={false} />
                                 <XAxis
-                                    dataKey={({ month, year }) => `${MONTHS[month as MonthKey]}`}
+                                    dataKey={({ month }) => `${MONTHS[month as MonthKey]}`}
                                     axisLine={false}
                                     tickLine={false}
                                     tick={({ x, y, payload }) => (
@@ -119,6 +118,6 @@ export default function MonthlySavingsPanel() {
                     </div>
                 </>
             )}
-        </div>
+        </AccordionPanel>
     );
 }
