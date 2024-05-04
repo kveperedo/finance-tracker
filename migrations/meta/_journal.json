@@ -22,6 +22,13 @@
       "when": 1713079960634,
       "tag": "0002_faulty_mongu",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1714833677448,
+      "tag": "0003_first_meteorite",
+      "breakpoints": true
     }
   ]
 }
