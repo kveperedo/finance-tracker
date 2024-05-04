@@ -12,8 +12,6 @@ export type AccordionPanelProps = PropsWithChildren<{
 export default function AccordionPanel({ title, children, isOpen, onToggle }: AccordionPanelProps) {
     const id = useId();
 
-    console.log(isOpen);
-
     return (
         <Accordion
             className="rounded border border-stone-300 bg-white shadow-sm"

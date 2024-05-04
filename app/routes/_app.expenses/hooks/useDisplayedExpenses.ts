@@ -6,14 +6,7 @@ import { generateFormData } from '~/lib/remix-hook-form';
 import type { AddExpenseInputWithId, DeleteExpenseInput } from '~/routes/resources.expenses/schema';
 import type { GetExpensesReturnType } from '../queries';
 import useExpenseSearchParams from './useExpenseSearchParams';
-import { getMonth, getYear } from '~/utils';
-
-const isDateMatchingSearchParams = (date: string, searchParams: { month: number; year: number }) => {
-    const month = getMonth(new Date(date));
-    const year = getYear(new Date(date));
-
-    return searchParams.month === month && searchParams.year === year;
-};
+import { isDateMatchingSearchParams } from '~/utils';
 
 type ExpenseFetcherFormData = Omit<AddExpenseInputWithId, 'date'> & { date: string };
 
@@ -27,26 +20,26 @@ export default function useDisplayedExpenses(): Array<DisplayExpense> {
     const [searchParams] = useExpenseSearchParams();
 
     const fetchers = useFetchers();
-    const expenseFetchers = fetchers.filter(({ key }) =>
-        [FETCHER_KEY.ADD, FETCHER_KEY.UPDATE, FETCHER_KEY.DELETE].includes(key)
-    );
-    const addFetcher = expenseFetchers.find(({ key }) => key === FETCHER_KEY.ADD);
-    const updateFetcher = expenseFetchers.find(({ key }) => key === FETCHER_KEY.UPDATE);
-    const deleteFetcher = expenseFetchers.find(({ key }) => key === FETCHER_KEY.DELETE);
+    const { pendingAddExpense, pendingUpdateExpense, pendingDeleteExpense } = useMemo(() => {
+        const expenseFetchers = fetchers.filter(({ key }) =>
+            [FETCHER_KEY.ADD, FETCHER_KEY.UPDATE, FETCHER_KEY.DELETE].includes(key)
+        );
+        const addFetcher = expenseFetchers.find(({ key }) => key === FETCHER_KEY.ADD);
+        const updateFetcher = expenseFetchers.find(({ key }) => key === FETCHER_KEY.UPDATE);
+        const deleteFetcher = expenseFetchers.find(({ key }) => key === FETCHER_KEY.DELETE);
 
-    const pendingAddExpense = useMemo(
-        () => (addFetcher?.formData ? (generateFormData(addFetcher.formData) as ExpenseFetcherFormData) : null),
-        [addFetcher?.formData]
-    );
-
-    const pendingUpdateExpense = useMemo(
-        () => (updateFetcher?.formData ? (generateFormData(updateFetcher.formData) as ExpenseFetcherFormData) : null),
-        [updateFetcher?.formData]
-    );
-    const pendingDeleteExpense = useMemo(
-        () => (deleteFetcher?.formData ? (generateFormData(deleteFetcher.formData) as DeleteExpenseInput) : null),
-        [deleteFetcher?.formData]
-    );
+        return {
+            pendingAddExpense: addFetcher?.formData
+                ? (generateFormData(addFetcher.formData) as ExpenseFetcherFormData)
+                : null,
+            pendingUpdateExpense: updateFetcher?.formData
+                ? (generateFormData(updateFetcher.formData) as ExpenseFetcherFormData)
+                : null,
+            pendingDeleteExpense: deleteFetcher?.formData
+                ? (generateFormData(deleteFetcher.formData) as DeleteExpenseInput)
+                : null,
+        };
+    }, [fetchers]);
 
     const expensesToDisplay = useMemo(() => {
         const defaultExpenses = expenses.map((expense, index) => ({
@@ -63,41 +56,45 @@ export default function useDisplayedExpenses(): Array<DisplayExpense> {
             return defaultExpenses;
         }
 
-        const expensesWithPendingAdd = pendingAddExpense
-            ? [
-                  ...expenses,
-                  {
-                      ...pendingAddExpense,
-                      createdAt: new Date(pendingAddExpense.date),
-                      updatedAt: new Date(pendingAddExpense.date),
-                      amount: String(pendingAddExpense.amount),
-                  },
-              ]
-            : expenses;
+        // When adding expense with a different date from the current date,
+        // the pending add expense is somehow already included in the expenses
+        // so we need to check if it's already included
+        const isAddPendingAlreadyIncluded = expenses.some((expense) => expense.id === pendingAddExpense?.id);
 
-        const enrichedExpenses = expensesWithPendingAdd.map((expense) => {
-            if (pendingUpdateExpense && expense.id === pendingUpdateExpense.id) {
+        const expensesWithPendingAdd =
+            pendingAddExpense && !isAddPendingAlreadyIncluded
+                ? [
+                      ...expenses,
+                      {
+                          ...pendingAddExpense,
+                          createdAt: new Date(pendingAddExpense.date),
+                          updatedAt: new Date(pendingAddExpense.date),
+                          amount: String(pendingAddExpense.amount),
+                      },
+                  ]
+                : expenses;
+
+        return expensesWithPendingAdd
+            .map((expense) => {
+                if (pendingUpdateExpense && expense.id === pendingUpdateExpense.id) {
+                    return {
+                        ...pendingUpdateExpense,
+                        amount: String(pendingUpdateExpense.amount),
+                        createdAt: new Date(expense.createdAt),
+                        updatedAt: new Date(pendingUpdateExpense.date),
+                        isPending: true,
+                    };
+                }
+
                 return {
-                    ...pendingUpdateExpense,
-                    amount: String(pendingUpdateExpense.amount),
-                    createdAt: new Date(expense.createdAt),
-                    updatedAt: new Date(pendingUpdateExpense.date),
-                    isPending: true,
+                    ...expense,
+                    createdAt: new Date(expense.updatedAt!),
+                    updatedAt: new Date(expense.updatedAt!),
+                    isPending: expense.id === pendingDeleteExpense?.id || expense.id === pendingAddExpense?.id,
                 };
-            }
-
-            return {
-                ...expense,
-                createdAt: new Date(expense.updatedAt!),
-                updatedAt: new Date(expense.updatedAt!),
-                isPending: expense.id === pendingDeleteExpense?.id || expense.id === pendingAddExpense?.id,
-            };
-        });
-        const sortedExpenses = enrichedExpenses.sort(
-            (a, b) => new Date(b.updatedAt!).getTime() - new Date(a.updatedAt!).getTime()
-        );
-
-        return sortedExpenses.map((expense, index) => ({ ...expense, index })) satisfies Array<DisplayExpense>;
+            })
+            .sort((a, b) => new Date(b.updatedAt!).getTime() - new Date(a.updatedAt!).getTime())
+            .map((expense, index) => ({ ...expense, index })) satisfies Array<DisplayExpense>;
     }, [expenses, pendingAddExpense, pendingDeleteExpense, pendingUpdateExpense, searchParams]);
 
     return expensesToDisplay;

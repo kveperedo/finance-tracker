@@ -9,8 +9,10 @@ import type { useFetcher } from '@remix-run/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { v4 as uuidv4 } from 'uuid';
 import DatePicker from '~/components/date-picker';
-import { toAriaDateTime, toNativeDate } from '~/utils';
+import { getMonth, getYear, isDateMatchingSearchParams, toAriaDateTime, toNativeDate } from '~/utils';
 import type { Expense } from '~/db/types';
+import useExpenseSearchParams from '../_app.expenses/hooks/useExpenseSearchParams';
+import { generateFormData } from '~/lib/remix-hook-form';
 
 const generateDefaultValues = (): AddExpenseInput => {
     return {
@@ -64,6 +66,19 @@ export default function ExpenseForm({
         },
     });
     const numberFieldRef = useRef<HTMLInputElement | null>(null);
+    const [searchParams, { setParam }] = useExpenseSearchParams();
+
+    useEffect(() => {
+        if (fetcher.formData) {
+            const formData = generateFormData(fetcher.formData);
+            const date = new Date(formData.date);
+
+            if (!isDateMatchingSearchParams(date.toString(), searchParams)) {
+                setParam('month', getMonth(date).toString());
+                setParam('year', getYear(date).toString());
+            }
+        }
+    }, [fetcher.formData, searchParams, setParam]);
 
     useEffect(() => {
         if (isSubmitSuccessful) {
