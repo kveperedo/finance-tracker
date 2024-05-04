@@ -6,8 +6,14 @@ import { generateFormData } from '~/lib/remix-hook-form';
 import type { AddExpenseInputWithId, DeleteExpenseInput } from '~/routes/resources.expenses/schema';
 import type { GetExpensesReturnType } from '../queries';
 import useExpenseSearchParams from './useExpenseSearchParams';
-import { getMonth } from '~/utils';
-import { getYear } from 'date-fns';
+import { getMonth, getYear } from '~/utils';
+
+const isDateMatchingSearchParams = (date: string, searchParams: { month: number; year: number }) => {
+    const month = getMonth(new Date(date));
+    const year = getYear(new Date(date));
+
+    return searchParams.month === month && searchParams.year === year;
+};
 
 type ExpenseFetcherFormData = Omit<AddExpenseInputWithId, 'date'> & { date: string };
 
@@ -30,40 +36,31 @@ export default function useDisplayedExpenses(): Array<DisplayExpense> {
 
     const pendingAddExpense = useMemo(
         () => (addFetcher?.formData ? (generateFormData(addFetcher.formData) as ExpenseFetcherFormData) : null),
-        [addFetcher]
+        [addFetcher?.formData]
     );
 
     const pendingUpdateExpense = useMemo(
         () => (updateFetcher?.formData ? (generateFormData(updateFetcher.formData) as ExpenseFetcherFormData) : null),
-        [updateFetcher]
+        [updateFetcher?.formData]
     );
     const pendingDeleteExpense = useMemo(
         () => (deleteFetcher?.formData ? (generateFormData(deleteFetcher.formData) as DeleteExpenseInput) : null),
-        [deleteFetcher]
+        [deleteFetcher?.formData]
     );
 
     const expensesToDisplay = useMemo(() => {
-        if (pendingAddExpense) {
-            const month = getMonth(new Date(pendingAddExpense.date));
-            const year = getYear(new Date(pendingAddExpense.date));
-
-            if (searchParams.month !== month || searchParams.year !== year) {
-                return expenses.map((expense, index) => ({
-                    ...expense,
-                    createdAt: new Date(expense.createdAt),
-                    updatedAt: new Date(expense.updatedAt),
-                    isPending: false,
-                    index,
-                })) satisfies Array<DisplayExpense>;
-            }
-        } else if (!pendingAddExpense && !pendingUpdateExpense && !pendingDeleteExpense) {
-            return expenses.map((expense, index) => ({
-                ...expense,
-                createdAt: new Date(expense.createdAt),
-                updatedAt: new Date(expense.updatedAt),
-                isPending: false,
-                index,
-            })) satisfies Array<DisplayExpense>;
+        const defaultExpenses = expenses.map((expense, index) => ({
+            ...expense,
+            createdAt: new Date(expense.createdAt),
+            updatedAt: new Date(expense.updatedAt),
+            isPending: false,
+            index,
+        })) satisfies Array<DisplayExpense>;
+        if (pendingAddExpense && !isDateMatchingSearchParams(pendingAddExpense.date, searchParams)) {
+            return defaultExpenses;
+        }
+        if (pendingUpdateExpense && !isDateMatchingSearchParams(pendingUpdateExpense.date, searchParams)) {
+            return defaultExpenses;
         }
 
         const expensesWithPendingAdd = pendingAddExpense
@@ -101,14 +98,7 @@ export default function useDisplayedExpenses(): Array<DisplayExpense> {
         );
 
         return sortedExpenses.map((expense, index) => ({ ...expense, index })) satisfies Array<DisplayExpense>;
-    }, [
-        expenses,
-        pendingAddExpense,
-        pendingDeleteExpense,
-        pendingUpdateExpense,
-        searchParams.month,
-        searchParams.year,
-    ]);
+    }, [expenses, pendingAddExpense, pendingDeleteExpense, pendingUpdateExpense, searchParams]);
 
     return expensesToDisplay;
 }

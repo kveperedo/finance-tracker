@@ -1,4 +1,4 @@
-import { useFetcher, useLoaderData } from '@remix-run/react';
+import { useLoaderData } from '@remix-run/react';
 import { redirect } from '@vercel/remix';
 import type { ExpenseParams } from './queries';
 import { getExpenses, getMonthlyExpenses, getSavingsSummary, getUserMonthlyIncome } from './queries';
@@ -10,10 +10,10 @@ import ExpenseFilterDropdown from './expense-filter-dropdown';
 import type { MonthKey } from './constants';
 import { MONTHS } from './constants';
 import ExpensesList from './expenses-list';
-import Button from '~/components/button';
-import ExpenseForm, { FETCHER_KEY } from '../resources.expenses/expense-form';
 import ExpenseSearchField from './expense-search-field';
-import MonthlySavingsPanel from './monthly-savings-panel';
+import ExpenseAside from './expense-aside';
+import { userPreferencesCookie } from '../resources.user-preferences/cookie.server';
+import type { UserPreferences } from '../resources.user-preferences/schema';
 
 export const meta: MetaFunction = ({ location }) => {
     const searchParams = new URLSearchParams(location.search);
@@ -35,6 +35,12 @@ export async function loader({ request }: LoaderFunctionArgs) {
         return redirect('/login');
     }
 
+    const cookieHeader = request.headers.get('Cookie');
+    const userPreferences = ((await userPreferencesCookie.parse(cookieHeader)) ?? {
+        showAddExpensePanel: true,
+        showSavingsPanel: true,
+    }) as UserPreferences;
+
     const searchParams = new URL(request.url).searchParams;
     const month = searchParams.get('month');
     const year = searchParams.get('year');
@@ -54,12 +60,11 @@ export async function loader({ request }: LoaderFunctionArgs) {
         getSavingsSummary(params),
     ]);
 
-    return { expenses, monthlyExpenses, monthlyIncome, savingsSummary };
+    return { expenses, monthlyExpenses, monthlyIncome, savingsSummary, userPreferences };
 }
 
 export default function ExpensesPage() {
     const { monthlyExpenses } = useLoaderData<typeof loader>();
-    const fetcher = useFetcher({ key: FETCHER_KEY.ADD });
 
     return (
         <div className="container mx-auto flex min-h-0 w-full flex-1 gap-4">
@@ -87,21 +92,7 @@ export default function ExpensesPage() {
                     </div>
                 </div>
             </main>
-            <aside className="my-4 -mr-2 hidden w-96 flex-col gap-4 overflow-auto pr-3 sm:flex">
-                <div className="rounded border border-stone-300 bg-white shadow-sm">
-                    <div className="border-b border-stone-300 p-4">
-                        <p className="text-sm font-medium">Add expenses</p>
-                    </div>
-                    <div className="p-4">
-                        <ExpenseForm fetcher={fetcher}>
-                            <Button className="mt-8 w-full" type="submit">
-                                Submit
-                            </Button>
-                        </ExpenseForm>
-                    </div>
-                </div>
-                <MonthlySavingsPanel />
-            </aside>
+            <ExpenseAside />
         </div>
     );
 }

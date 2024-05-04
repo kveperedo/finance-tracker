@@ -2,13 +2,15 @@
 import { Dialog } from 'react-aria-components';
 import type { MonthKey } from './constants';
 import { MONTHS, generateYears } from './constants';
-import { ChevronsUpDown, FilterX } from 'lucide-react';
+import { ChevronsUpDown, CircleX, FilterX } from 'lucide-react';
 import Popover from '~/components/popover';
 import { ListBoxItem } from '~/components/item';
 import Button from '~/components/button';
 import Select from '~/components/select';
 import { useRef, useState } from 'react';
 import useExpenseSearchParams from './hooks/useExpenseSearchParams';
+import { getMonth } from '~/utils';
+import { getYear } from 'date-fns';
 
 const YEARS = generateYears();
 
@@ -16,15 +18,34 @@ export default function ExpenseFilterDropdown() {
     const triggerRef = useRef(null);
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const [{ month: currentMonth, year: currentYear }, actions] = useExpenseSearchParams();
+    const dateNow = new Date();
+    const isSameAsCurrentDate = getMonth(dateNow) === currentMonth && getYear(dateNow) === currentYear;
 
     return (
         <>
             <Button
-                className="whitespace-nowrap shadow-sm"
+                className="whitespace-nowrap pr-[6px] shadow-sm"
                 ref={triggerRef}
                 onPress={() => setIsPopoverOpen(true)}
                 variant="outline"
-                rightIcon={<ChevronsUpDown size={16} />}
+                rightIcon={
+                    isSameAsCurrentDate ? (
+                        <div className="flex h-7 w-7 items-center justify-center">
+                            <ChevronsUpDown size={16} />
+                        </div>
+                    ) : (
+                        <Button
+                            className="hover:bg-stone-300"
+                            size="icon-sm"
+                            variant="tertiary"
+                            onPress={() => {
+                                actions.deleteParam('month', 'year');
+                            }}
+                        >
+                            <CircleX size={16} />
+                        </Button>
+                    )
+                }
             >
                 {MONTHS[currentMonth as MonthKey]} {currentYear}
             </Button>
@@ -66,17 +87,19 @@ export default function ExpenseFilterDropdown() {
                         </Select>
                     </div>
 
-                    <Button
-                        onPress={() => {
-                            setIsPopoverOpen(false);
-                            actions.deleteParam('month', 'year');
-                        }}
-                        variant="secondary"
-                        className="mt-4 w-full"
-                        leftIcon={<FilterX size={16} />}
-                    >
-                        Clear filters
-                    </Button>
+                    {!isSameAsCurrentDate && (
+                        <Button
+                            onPress={() => {
+                                setIsPopoverOpen(false);
+                                actions.deleteParam('month', 'year');
+                            }}
+                            variant="secondary"
+                            className="mt-4 w-full"
+                            leftIcon={<FilterX size={16} />}
+                        >
+                            Clear filters
+                        </Button>
+                    )}
                 </Dialog>
             </Popover>
         </>
