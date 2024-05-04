@@ -65,3 +65,10 @@ export function toAriaDateTime(date: Date) {
 export function toNativeDate(dateValue: DateValue) {
     return new Date(dateValue.toString());
 }
+
+export const isDateMatchingSearchParams = (date: string, searchParams: { month: number; year: number }) => {
+    const month = getMonth(new Date(date));
+    const year = getYear(new Date(date));
+
+    return searchParams.month === month && searchParams.year === year;
+};

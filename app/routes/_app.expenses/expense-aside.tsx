@@ -6,6 +6,8 @@ import type { AccordionPanelProps } from '../../components/accordion-panel';
 import AccordionPanel from '../../components/accordion-panel';
 import type { UserPreferenceKey, UserPreferences } from '../resources.user-preferences/schema';
 import type { loader } from './route';
+import { generateFormData } from '~/lib/remix-hook-form';
+import { useMemo } from 'react';
 
 function ExpenseFormPanel(props: Pick<AccordionPanelProps, 'isOpen' | 'onToggle'>) {
     const fetcher = useFetcher({ key: FETCHER_KEY.ADD });
@@ -24,7 +26,12 @@ function ExpenseFormPanel(props: Pick<AccordionPanelProps, 'isOpen' | 'onToggle'
 export default function ExpenseAside() {
     const { userPreferences } = useLoaderData<typeof loader>();
     const fetcher = useFetcher<UserPreferences>({ key: 'user-prefs-fetcher' });
-    const { showAddExpensePanel = true, showSavingsPanel = true } = fetcher.data ?? userPreferences;
+    const optimisticUserPreferences = useMemo(() => {
+        return fetcher.formData ? (generateFormData(fetcher.formData) as UserPreferences) : null;
+    }, [fetcher.formData]);
+    const showAddExpensePanel =
+        optimisticUserPreferences?.showAddExpensePanel ?? userPreferences.showAddExpensePanel ?? true;
+    const showSavingsPanel = optimisticUserPreferences?.showSavingsPanel ?? userPreferences.showSavingsPanel ?? true;
 
     const updatePreferences = (preferenceKey: UserPreferenceKey, isOpen: boolean) => {
         fetcher.submit({ [preferenceKey]: isOpen }, { method: 'POST', action: '/resources/user-preferences' });

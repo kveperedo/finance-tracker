@@ -42,7 +42,7 @@ function ExpenseItem({ expense, spring, springRef }: ExpenseItemProps) {
     useEffect(() => {
         if (expense.isPending) {
             setTimeout(
-                () => containerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' }),
+                () => containerRef.current?.scrollIntoView({ behavior: 'auto', block: 'center', inline: 'center' }),
                 0
             );
         }

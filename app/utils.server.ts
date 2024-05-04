@@ -7,7 +7,7 @@ export function redirectToLogin(request: Request) {
     return redirect(`/login?${searchParams}`);
 }
 
-export async function withDelay<T>(func: Promise<T>, delay: number = 500): Promise<T> {
+export async function withDelay<T>(func: Promise<T>, delay: number = 800): Promise<T> {
     const [result] = await Promise.allSettled([func, new Promise((resolve) => setTimeout(resolve, delay))]);
 
     if (result.status === 'rejected') {
