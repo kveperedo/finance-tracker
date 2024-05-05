@@ -1,15 +1,24 @@
 import type { LoginUserInput, RegisterUserInput } from './schema';
 import db from '~/db';
 import bcrypt from 'bcryptjs';
-import { users } from '~/db/schema';
+import { invitations, users } from '~/db/schema';
 import { eq } from 'drizzle-orm';
 import { getSession, destroySession, commitSession } from './cookie.server';
 import { redirect } from '@vercel/remix';
 
-export async function register({ email, password }: Omit<RegisterUserInput, 'passwordConfirmation'>) {
+type RegisterParams = Omit<RegisterUserInput, 'passwordConfirmation'> & {
+    invitationCode: string;
+};
+
+export async function register({ email, password, invitationCode }: RegisterParams) {
     const passwordHash = await bcrypt.hash(password, 10);
 
-    const [user] = await db.insert(users).values({ email, passwordHash }).returning();
+    const user = await db.transaction(async (tx) => {
+        const [user] = await tx.insert(users).values({ email, passwordHash }).returning();
+        await tx.update(invitations).set({ isRegistered: true }).where(eq(invitations.id, invitationCode));
+
+        return user;
+    });
 
     if (!user) {
         return null;

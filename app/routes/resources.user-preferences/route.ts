@@ -27,6 +27,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
     cookie.showAddExpensePanel = data.showAddExpensePanel ?? cookie.showAddExpensePanel;
     cookie.showSavingsPanel = data.showSavingsPanel ?? cookie.showSavingsPanel;
+    cookie.showInvitationsPanel = data.showInvitationsPanel ?? cookie.showInvitationsPanel;
 
     return json(cookie, {
         headers: { 'Set-Cookie': await userPreferencesCookie.serialize(cookie) },

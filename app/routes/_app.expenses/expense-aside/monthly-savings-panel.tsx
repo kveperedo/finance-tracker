@@ -1,24 +1,24 @@
 import { useLoaderData } from '@remix-run/react';
 import { cn, numberFormatter } from '~/utils';
 import { ResponsiveContainer, BarChart, Bar, XAxis, CartesianGrid, LabelList, Cell, Text } from 'recharts';
-import type { MonthKey } from './constants';
-import { MONTHS } from './constants';
-import type { loader } from './route';
-import useExpenseSearchParams from './hooks/useExpenseSearchParams';
-import MonthlyIncomeForm from '../resources.monthly-savings/monthly-income-form';
+import type { MonthKey } from '../constants';
+import { MONTHS } from '../constants';
+import type { loader } from '../route';
+import useExpenseSearchParams from '../hooks/useExpenseSearchParams';
+import MonthlyIncomeForm from '../../resources.monthly-savings/monthly-income-form';
 import { Dialog, DialogTrigger } from 'react-aria-components';
 import Button from '~/components/button';
 import { Ellipsis } from 'lucide-react';
 import Popover from '~/components/popover';
 import { useFetcherWithReset } from '~/hooks/useFetcherWithReset';
-import type { AccordionPanelProps } from '../../components/accordion-panel';
-import AccordionPanel from '../../components/accordion-panel';
+import type { AccordionPanelProps } from '../../../components/accordion-panel';
+import AccordionPanel from '../../../components/accordion-panel';
 
 function EmptyMonthlyIncome() {
     const fetcher = useFetcherWithReset();
 
     return (
-        <div className="flex flex-col gap-4 p-4">
+        <div className="flex flex-col gap-4">
             <p className="text-sm">Want to track your savings per month? Set your monthly income now!</p>
             <MonthlyIncomeForm fetcher={fetcher} />
         </div>

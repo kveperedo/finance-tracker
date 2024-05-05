@@ -62,6 +62,21 @@ export async function getMonthlyExpenses({ userId, month, year }: ExpenseParams)
     return result.total ? parseFloat(result.total) : 0;
 }
 
+export async function getUserRole(userId: string) {
+    const [result] = await db
+        .select({
+            role: userDetails.role,
+        })
+        .from(userDetails)
+        .where(eq(userDetails.userId, userId));
+
+    if (!result) {
+        return null;
+    }
+
+    return result.role;
+}
+
 export async function getUserMonthlyIncome(userId: string) {
     const [result] = await db
         .select({
