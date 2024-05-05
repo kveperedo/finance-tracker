@@ -1,38 +1,52 @@
-# Remix
+# Finance Tracker
 
-This directory is a brief example of a [Remix](https://remix.run/docs) site that can be deployed to Vercel with zero configuration.
+## Description
 
-To get started, run the Remix cli with this template
+This is a finance tracker app built with React, Remix, and TailwindCSS. It allows users to track their income and expenses and see a summary of their transactions.
 
-```sh
-npx create-remix@latest --template vercel/vercel/examples/remix
-```
+## Features
 
-## Deploy Your Own
+-   Expense Tracking: Keep track of your expenses per month to manage your finances better
+-   Savings Management: Monitor your savings and see how much you have saved per month
+-   Responsive Design: The app is responsive and works seamlessly across different devices.
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/vercel/vercel/tree/main/examples/remix&template=remix)
+## Installation
 
-_Live Example: https://remix-run-template.vercel.app_
+1. Clone the repository
 
-You can also deploy using the [Vercel CLI](https://vercel.com/docs/cli):
+2. Install dependencies
 
-```sh
-npm i -g vercel
-vercel
-```
+    ```bash
+    npm install
+    ```
 
-## Development
+3. Setup environment variables by creating a `.env` file in the root of the project and adding variables based on the schema defined in `app/env.server.ts`
 
-To run your Remix app locally, make sure your project's local dependencies are installed:
+4. Run the migrations script
 
-```sh
-npm install
-```
+    ```bash
+    npm run db:migrate
+    ```
 
-Afterwards, start the Remix development server like so:
+5. Start the development server
 
-```sh
-npm run dev
-```
+    ```bash
+    npm run dev
+    ```
 
-Open up [http://localhost:5173](http://localhost:5173) and you should be ready to go!
+6. Create a new user by following these steps:
+    - Create a new entry in the `invitations` table
+    - Navigate to `/register?invite={invitation_code}` and use the generated primary key id as the invitation code to create a new user
+    - In the `user-details` table, update the `role` column to `admin` for to be able to generate new invitation directly from the app
+
+## Technologies Used
+
+-   React: UI library
+-   TypeScript: Programming language
+-   Remix: React framework
+-   TailwindCSS: CSS framework
+-   PostgreSQL: Database management system
+-   Drizzle: Typescript-based ORM
+-   Zod: Schema declaration and validation library
+-   React Aria Components: Headless component library
+-   Other libraries: Various other libraries and tools for specific functionalities (listed in package.json).
