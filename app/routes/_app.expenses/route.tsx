@@ -1,7 +1,7 @@
 import { useLoaderData } from '@remix-run/react';
 import { redirect } from '@vercel/remix';
 import type { ExpenseParams } from './queries';
-import { getExpenses, getMonthlyExpenses, getSavingsSummary, getUserMonthlyIncome } from './queries';
+import { getExpenses, getMonthlyExpenses, getSavingsSummary, getUserMonthlyIncome, getUserRole } from './queries';
 import AddExpenseModal from './add-expense-modal';
 import type { LoaderFunctionArgs, MetaFunction } from '@vercel/remix';
 import { getUserId } from '~/auth/session.server';
@@ -53,14 +53,15 @@ export async function loader({ request }: LoaderFunctionArgs) {
         search: search ?? undefined,
     };
 
-    const [expenses, monthlyExpenses, monthlyIncome, savingsSummary] = await Promise.all([
+    const [expenses, monthlyExpenses, monthlyIncome, userRole, savingsSummary] = await Promise.all([
         getExpenses(params),
         getMonthlyExpenses(params),
         getUserMonthlyIncome(userId),
+        getUserRole(userId),
         getSavingsSummary(params),
     ]);
 
-    return { expenses, monthlyExpenses, monthlyIncome, savingsSummary, userPreferences };
+    return { expenses, monthlyExpenses, monthlyIncome, savingsSummary, userPreferences, userRole };
 }
 
 export default function ExpensesPage() {

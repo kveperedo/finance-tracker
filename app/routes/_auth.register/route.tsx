@@ -9,13 +9,14 @@ import TextField from '~/components/text-field';
 import Button from '~/components/button';
 import { Link, useActionData, useNavigation } from '@remix-run/react';
 import { Loader } from 'lucide-react';
-import type { ActionFunctionArgs, MetaFunction, SerializeFrom } from '@vercel/remix';
-import { json } from '@vercel/remix';
+import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction, SerializeFrom } from '@vercel/remix';
+import { json, redirect } from '@vercel/remix';
 import db from '~/db';
 import { users } from '~/db/schema';
 import { eq } from 'drizzle-orm';
 import { createUserSession, register } from '~/auth/session.server';
 import { useEffect, useState } from 'react';
+import { validateInvitationCode } from '../resources.invitations/queries';
 
 type ServerError = { errorType: 'accountExists' | 'unknownError' };
 const isServerError = (actionData: SerializeFrom<typeof action>): actionData is ServerError => {
@@ -32,7 +33,28 @@ export const meta: MetaFunction = () => {
     ];
 };
 
+export async function loader({ request }: LoaderFunctionArgs) {
+    const params = new URL(request.url).searchParams;
+    const invitationCode = params.get('invite');
+    if (!invitationCode) {
+        throw redirect('/login');
+    }
+
+    const isValidInvitationCode = await validateInvitationCode(invitationCode);
+    if (!isValidInvitationCode) {
+        throw redirect('/login');
+    }
+
+    return { ok: true };
+}
+
 export async function action({ request }: ActionFunctionArgs) {
+    const params = new URL(request.url).searchParams;
+    const invitationCode = params.get('invite');
+    if (!invitationCode) {
+        throw redirect('/login');
+    }
+
     const {
         data,
         errors,
@@ -50,7 +72,7 @@ export async function action({ request }: ActionFunctionArgs) {
         });
     }
 
-    const user = await register({ email: data.email, password: data.passwordHash });
+    const user = await register({ email: data.email, password: data.passwordHash, invitationCode: invitationCode });
     if (!user) {
         return json({ errorType: 'unknownError' } as ServerError, {
             status: 500,

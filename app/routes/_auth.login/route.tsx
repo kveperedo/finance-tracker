@@ -140,8 +140,13 @@ export default function LoginPage() {
 
                 <p className="pt-4 text-sm text-stone-500">
                     Don't have an account?{' '}
-                    <Link prefetch="intent" to="/register" className="text-stone-700 underline">
-                        Sign up
+                    <Link
+                        target="_blank"
+                        rel="noreferrer"
+                        to="mailto:kveperedo@gmail.com"
+                        className="text-stone-700 underline"
+                    >
+                        Request an invite
                     </Link>
                 </p>
             </ModalContainer>
