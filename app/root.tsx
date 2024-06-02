@@ -7,6 +7,7 @@ import stylesheet from '~/tailwind.css?url';
 import '@fontsource-variable/jetbrains-mono';
 import '@fontsource-variable/open-sans';
 import ProgressBar from './components/progress-bar';
+import { useEffect, useState } from 'react';
 
 export const links: LinksFunction = () => [
     { rel: 'stylesheet', href: stylesheet },
@@ -18,11 +19,19 @@ export const links: LinksFunction = () => [
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
+    const [metaTagContent, setMetaTagContent] = useState('width=device-width, initial-scale=1');
+
+    useEffect(() => {
+        if (navigator.userAgent.indexOf('iPhone') > -1) {
+            setMetaTagContent('width=device-width, initial-scale=1, maximum-scale=1');
+        }
+    }, []);
+
     return (
         <html className="font-serif" lang="en">
             <head>
                 <meta charSet="utf-8" />
-                <meta name="viewport" content="width=device-width, initial-scale=1" />
+                <meta name="viewport" content={metaTagContent} />
                 <Meta />
                 <ManifestLink />
                 <Links />
