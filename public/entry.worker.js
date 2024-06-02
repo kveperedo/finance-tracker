@@ -198,6 +198,7 @@ const route11 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePrope
 }, Symbol.toStringTag, { value: "Module" }));
 const assets = [
   "/entry.worker.js",
+  "/favicon.ico",
   "/logo.png",
   "/screenshot-mobile.png",
   "/screenshot.png"
