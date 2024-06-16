@@ -1,4 +1,4 @@
-import { ListPlus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { DialogTrigger } from 'react-aria-components';
 import { useCallback, useState } from 'react';
 import Button from '~/components/button';
@@ -17,7 +17,7 @@ export default function AddExpenseModal() {
     return (
         <DialogTrigger isOpen={isOpen} onOpenChange={setIsOpen}>
             <Button size="icon">
-                <ListPlus size={16} />
+                <Plus size={16} />
             </Button>
             <Modal title="Add Expense">
                 <ExpenseForm fetcher={fetcher} autoFocus onSubmitSuccess={handleSubmitSuccess}>
