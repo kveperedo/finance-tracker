@@ -1,4 +1,6 @@
 {
+  "id": "5c5e40e9-9037-41c6-bf2e-103499447d97",
+  "prevId": "2dc2c26f-9b35-43c1-9ec5-3a31021f6450",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -25,6 +27,14 @@
           "primaryKey": false,
           "notNull": true
         },
+        "category": {
+          "name": "category",
+          "type": "expenses_categories",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'others'"
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
@@ -50,17 +60,54 @@
         "expenses_user_id_users_id_fk": {
           "name": "expenses_user_id_users_id_fk",
           "tableFrom": "expenses",
+          "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
-          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         }
       },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.invitations": {
+      "name": "invitations",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "is_registered": {
+          "name": "is_registered",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
@@ -74,6 +121,14 @@
           "primaryKey": true,
           "notNull": true,
           "default": "gen_random_uuid()"
+        },
+        "role": {
+          "name": "role",
+          "type": "role",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'user'"
         },
         "monthly_income": {
           "name": "monthly_income",
@@ -90,6 +145,7 @@
       },
       "indexes": {
         "user_id_idx": {
+          "name": "user_id_idx",
           "columns": [
             {
               "expression": "user_id",
@@ -98,35 +154,35 @@
               "nulls": "last"
             }
           ],
-          "name": "user_id_idx",
           "isUnique": true,
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         }
       },
       "foreignKeys": {
         "user_details_user_id_users_id_fk": {
           "name": "user_details_user_id_users_id_fk",
           "tableFrom": "user_details",
+          "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
-          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "user_details_user_id_unique": {
           "name": "user_details_user_id_unique",
+          "nullsNotDistinct": false,
           "columns": [
             "user_id"
-          ],
-          "nullsNotDistinct": false
+          ]
         }
       }
     },
@@ -169,6 +225,7 @@
       },
       "indexes": {
         "email_idx": {
+          "name": "email_idx",
           "columns": [
             {
               "expression": "email",
@@ -177,10 +234,10 @@
               "nulls": "last"
             }
           ],
-          "name": "email_idx",
           "isUnique": true,
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         }
       },
       "foreignKeys": {},
@@ -188,21 +245,41 @@
       "uniqueConstraints": {
         "users_email_unique": {
           "name": "users_email_unique",
+          "nullsNotDistinct": false,
           "columns": [
             "email"
-          ],
-          "nullsNotDistinct": false
+          ]
         }
       }
     }
   },
-  "enums": {},
+  "enums": {
+    "public.expenses_categories": {
+      "name": "expenses_categories",
+      "schema": "public",
+      "values": [
+        "housing",
+        "transport",
+        "groceries",
+        "food",
+        "personal-care",
+        "entertainment",
+        "others"
+      ]
+    },
+    "public.role": {
+      "name": "role",
+      "schema": "public",
+      "values": [
+        "admin",
+        "user"
+      ]
+    }
+  },
   "schemas": {},
   "_meta": {
+    "columns": {},
     "schemas": {},
-    "tables": {},
-    "columns": {}
-  },
-  "id": "59325b04-d137-47bc-804b-0dbbe6d7273c",
-  "prevId": "a0f9aab5-306d-4391-9954-0dec8daa4297"
+    "tables": {}
+  }
 }

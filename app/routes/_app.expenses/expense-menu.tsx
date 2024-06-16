@@ -38,12 +38,15 @@ export default function ExpenseMenu({ isPendingExpense, onDeleteClick, onEditCli
                             }
                         }}
                     >
-                        <MenuItem id={ACTION.UPDATE} textValue="edit">
-                            <PencilLine className="mr-3" size={16} />
+                        <MenuItem id={ACTION.UPDATE} textValue="edit" icon={<PencilLine size={16} />}>
                             Edit
                         </MenuItem>
-                        <MenuItem className="text-red-500 focus:bg-red-50" id={ACTION.DELETE} textValue="delete">
-                            <Trash className="mr-3" size={16} />
+                        <MenuItem
+                            className="text-red-500 focus:bg-red-50"
+                            id={ACTION.DELETE}
+                            textValue="delete"
+                            icon={<Trash size={16} />}
+                        >
                             Delete
                         </MenuItem>
                     </Menu>

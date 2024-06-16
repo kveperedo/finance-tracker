@@ -34,10 +34,21 @@ export const userDetails = pgTable(
     })
 );
 
+export const expensesCategories = pgEnum('expenses_categories', [
+    'housing',
+    'transport',
+    'groceries',
+    'food',
+    'personal-care',
+    'entertainment',
+    'others',
+]);
+
 export const expenses = pgTable('expenses', {
     id: uuid('id').defaultRandom().primaryKey(),
     description: text('description').notNull(),
     amount: numeric('amount', { precision: 10, scale: 2 }).notNull(),
+    category: expensesCategories('category').default('others').notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at')
         .notNull()

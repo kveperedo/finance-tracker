@@ -11,13 +11,17 @@ export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }
 
+export function tw(...inputs: ClassValue[]) {
+    return clsx(inputs);
+}
+
 export const numberFormatter = new Intl.NumberFormat('en-PH', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
 });
 
 export const focusRing = tv({
-    base: 'outline outline-offset-2 outline-stone-800',
+    base: tw('outline outline-offset-2 outline-stone-800'),
     variants: {
         isFocusVisible: {
             false: 'outline-0',

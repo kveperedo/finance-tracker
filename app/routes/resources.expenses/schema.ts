@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { createInsertSchema } from 'drizzle-zod';
-import { expenses } from '~/db/schema';
+import { expenses, expensesCategories } from '~/db/schema';
 
 export const expenseSchema = z.object({
     intent: z.enum(['create', 'update', 'delete']).default('create'),
@@ -28,6 +28,10 @@ export const addExpenseSchema = expenseSchema
     )
     .extend({
         date: z.coerce.date(),
+        category: z.enum(expensesCategories.enumValues, {
+            required_error: 'Category is required',
+            invalid_type_error: 'Category is required',
+        }),
     });
 
 export type AddExpenseInput = z.infer<typeof addExpenseSchema>;

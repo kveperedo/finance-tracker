@@ -9,13 +9,14 @@ import useDisplayedExpenses from './hooks/useDisplayedExpenses';
 import { useDrag } from '@use-gesture/react';
 import { animated, useSprings, easings } from '@react-spring/web';
 import Button from '~/components/button';
-import { PencilLine, Trash } from 'lucide-react';
+import { Pencil, Trash } from 'lucide-react';
 import { useBreakpoint } from '~/hooks/useBreakpoint';
 import { useFetcher } from '@remix-run/react';
 import ExpenseForm, { FETCHER_KEY } from '../resources.expenses/expense-form';
 import AlertDialog from '~/components/alert-dialog';
 import type { DeleteExpenseInput } from '../resources.expenses/schema';
 import Modal from '~/components/modal';
+import CategoryTag from './expense-category-tag';
 
 type SpringProps = { x: number; isOpen: boolean };
 type SpringsReturnType = ReturnType<typeof useSprings<SpringProps>>;
@@ -108,7 +109,7 @@ function ExpenseItem({ expense, spring, springRef }: ExpenseItemProps) {
                         size="icon-sm"
                         onPress={() => setIntent('update')}
                     >
-                        <PencilLine size={16} />
+                        <Pencil size={16} />
                     </Button>
                     <Button
                         variant="outline"
@@ -127,9 +128,12 @@ function ExpenseItem({ expense, spring, springRef }: ExpenseItemProps) {
                     )}
                     style={{ x: spring.x }}
                 >
-                    <div>
-                        <p className="text-sm font-medium text-stone-950">{expense.description}</p>
-                        <p className="text-xs text-stone-400">{format(expense.updatedAt, 'MMMM dd')}</p>
+                    <div className="flex items-center gap-2">
+                        <CategoryTag category={expense.category} />
+                        <div>
+                            <p className="text-sm font-medium text-stone-950">{expense.description}</p>
+                            <p className="text-xs text-stone-400">{format(expense.updatedAt, 'MMMM dd')}</p>
+                        </div>
                     </div>
 
                     <div className="flex items-center gap-1">

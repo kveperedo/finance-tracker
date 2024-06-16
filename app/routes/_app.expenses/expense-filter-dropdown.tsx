@@ -108,7 +108,7 @@ export default function ExpenseFilterDropdown() {
                 onOpenChange={setIsPopoverOpen}
                 showArrow
             >
-                <Dialog aria-label="Expense filter dropdown" className="w-72 p-4 outline-none">
+                <Dialog aria-label="Expense filter dropdown" className="w-60 p-4 outline-none">
                     <MonthSelect />
                     {!isSameAsCurrentDate && (
                         <Button

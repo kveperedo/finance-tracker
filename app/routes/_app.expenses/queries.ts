@@ -29,6 +29,7 @@ export function getExpenses({ userId, month, year, search }: ExpenseParams) {
             id: expenses.id,
             description: expenses.description,
             amount: expenses.amount,
+            category: expenses.category,
             createdAt: expenses.createdAt,
             updatedAt: expenses.updatedAt,
         })
