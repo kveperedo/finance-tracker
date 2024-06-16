@@ -1,10 +1,8 @@
 {
-  "id": "a0f9aab5-306d-4391-9954-0dec8daa4297",
-  "prevId": "82cc41bc-4757-4946-9be2-957d3b3e06e2",
-  "version": "5",
-  "dialect": "pg",
+  "version": "7",
+  "dialect": "postgresql",
   "tables": {
-    "expenses": {
+    "public.expenses": {
       "name": "expenses",
       "schema": "",
       "columns": {
@@ -52,21 +50,21 @@
         "expenses_user_id_users_id_fk": {
           "name": "expenses_user_id_users_id_fk",
           "tableFrom": "expenses",
-          "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "users": {
+    "public.users": {
       "name": "users",
       "schema": "",
       "columns": {
@@ -105,11 +103,18 @@
       },
       "indexes": {
         "email_idx": {
-          "name": "email_idx",
           "columns": [
-            "email"
+            {
+              "expression": "email",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": true
+          "name": "email_idx",
+          "isUnique": true,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {},
@@ -117,10 +122,10 @@
       "uniqueConstraints": {
         "users_email_unique": {
           "name": "users_email_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "email"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       }
     }
@@ -128,8 +133,10 @@
   "enums": {},
   "schemas": {},
   "_meta": {
-    "columns": {},
     "schemas": {},
-    "tables": {}
-  }
+    "tables": {},
+    "columns": {}
+  },
+  "id": "a0f9aab5-306d-4391-9954-0dec8daa4297",
+  "prevId": "82cc41bc-4757-4946-9be2-957d3b3e06e2"
 }

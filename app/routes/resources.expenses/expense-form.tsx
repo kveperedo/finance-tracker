@@ -9,16 +9,20 @@ import type { useFetcher } from '@remix-run/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { v4 as uuidv4 } from 'uuid';
 import DatePicker from '~/components/date-picker';
-import { getMonth, getYear, isDateMatchingSearchParams, toAriaDateTime, toNativeDate } from '~/utils';
+import { cn, getMonth, getYear, isDateMatchingSearchParams, toAriaDateTime, toNativeDate } from '~/utils';
 import type { Expense } from '~/db/types';
 import useExpenseSearchParams from '../_app.expenses/hooks/useExpenseSearchParams';
 import { generateFormData } from '~/lib/remix-hook-form';
+import Select from '~/components/select';
+import { ListBoxItem } from '~/components/item';
+import { expenseCategories, getTagColors } from './constants';
 
 const generateDefaultValues = (): AddExpenseInput => {
     return {
         date: new Date(),
         amount: 0,
         description: '',
+        category: null as any,
         intent: 'create',
     };
 };
@@ -131,6 +135,52 @@ export default function ExpenseForm({
                             />
                         );
                     }}
+                />
+
+                <Controller
+                    control={control}
+                    name="category"
+                    render={({ field, fieldState: { error } }) => (
+                        <Select
+                            label="Category"
+                            placeholder="Select a category"
+                            items={expenseCategories}
+                            renderValue={({ label, Icon }) => (
+                                <span className="flex items-center gap-3">
+                                    <span className={cn(field.value && getTagColors(field.value), 'bg-transparent')}>
+                                        <Icon size={16} />
+                                    </span>
+                                    {label}
+                                </span>
+                            )}
+                            {...field}
+                            selectedKey={field.value}
+                            onSelectionChange={(item) => field.onChange(item)}
+                            isInvalid={!!error?.message}
+                            errorMessage={error?.message}
+                        >
+                            {(item) => {
+                                const { Icon } = item;
+
+                                return (
+                                    <ListBoxItem
+                                        id={item.value}
+                                        textValue={item.value}
+                                        icon={
+                                            <Icon
+                                                className={cn(
+                                                    getTagColors(item.value),
+                                                    'h-[inherit] w-[inherit] bg-transparent'
+                                                )}
+                                            />
+                                        }
+                                    >
+                                        {item.label}
+                                    </ListBoxItem>
+                                );
+                            }}
+                        </Select>
+                    )}
                 />
 
                 <Controller
