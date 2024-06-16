@@ -1,18 +1,70 @@
 /* eslint-disable drizzle/enforce-delete-with-where */
 import { Dialog } from 'react-aria-components';
 import type { MonthKey } from './constants';
-import { MONTHS, generateYears } from './constants';
-import { ChevronsUpDown, CircleX, FilterX } from 'lucide-react';
+import { MONTHS, SHORT_MONTHS } from './constants';
+import { ChevronLeft, ChevronRight, ChevronsUpDown, CircleX, FilterX } from 'lucide-react';
 import Popover from '~/components/popover';
-import { ListBoxItem } from '~/components/item';
 import Button from '~/components/button';
-import Select from '~/components/select';
 import { useRef, useState } from 'react';
 import useExpenseSearchParams from './hooks/useExpenseSearchParams';
-import { getMonth } from '~/utils';
+import { cn, getMonth } from '~/utils';
 import { getYear } from 'date-fns';
+import { chunk } from 'lodash-es';
 
-const YEARS = generateYears();
+function MonthSelect() {
+    const [{ month: currentMonth, year: currentYear }, actions] = useExpenseSearchParams();
+    const chunkedMonths = chunk(Object.entries(SHORT_MONTHS), 3);
+
+    return (
+        <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+                <Button
+                    variant="outline"
+                    size="icon-sm"
+                    onPress={() => actions.setParam('year', String(currentYear - 1))}
+                >
+                    <ChevronLeft />
+                </Button>
+
+                <p className="text-sm">
+                    {MONTHS[currentMonth as MonthKey]} {currentYear}
+                </p>
+
+                <Button
+                    variant="outline"
+                    size="icon-sm"
+                    onPress={() => actions.setParam('year', String(currentYear + 1))}
+                >
+                    <ChevronRight />
+                </Button>
+            </div>
+
+            <div className="flex flex-col gap-2">
+                {chunkedMonths.map((months, index) => (
+                    <div key={index} className="flex gap-2">
+                        {months.map(([key, value]) => {
+                            const isCurrentMonth = currentMonth === Number(key);
+
+                            return (
+                                <Button
+                                    key={key}
+                                    onPress={() => {
+                                        actions.setParam('month', key);
+                                    }}
+                                    size="sm"
+                                    variant={isCurrentMonth ? 'primary' : 'tertiary'}
+                                    className={cn('flex-1', isCurrentMonth && 'shadow-sm')}
+                                >
+                                    {value}
+                                </Button>
+                            );
+                        })}
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
 
 export default function ExpenseFilterDropdown() {
     const triggerRef = useRef(null);
@@ -47,46 +99,17 @@ export default function ExpenseFilterDropdown() {
                     )
                 }
             >
-                {MONTHS[currentMonth as MonthKey]} {currentYear}
+                {MONTHS[currentMonth as MonthKey]} {currentYear} Expenses
             </Button>
-            <Popover triggerRef={triggerRef} isOpen={isPopoverOpen} onOpenChange={setIsPopoverOpen} showArrow>
+            <Popover
+                placement="bottom left"
+                triggerRef={triggerRef}
+                isOpen={isPopoverOpen}
+                onOpenChange={setIsPopoverOpen}
+                showArrow
+            >
                 <Dialog aria-label="Expense filter dropdown" className="w-72 p-4 outline-none">
-                    <div className="flex items-center gap-4">
-                        <Select
-                            name="month"
-                            className="flex-1"
-                            autoFocus
-                            label="Month"
-                            defaultSelectedKey={currentMonth}
-                            selectedKey={currentMonth}
-                            onSelectionChange={(key) => {
-                                actions.setParam('month', String(key));
-                            }}
-                        >
-                            {Object.entries(MONTHS).map(([key, value]) => (
-                                <ListBoxItem key={key} id={Number(key)}>
-                                    {value}
-                                </ListBoxItem>
-                            ))}
-                        </Select>
-                        <Select
-                            name="year"
-                            className="flex-1"
-                            label="Year"
-                            defaultSelectedKey={currentYear}
-                            selectedKey={currentYear}
-                            onSelectionChange={(key) => {
-                                actions.setParam('year', String(key));
-                            }}
-                        >
-                            {YEARS.map((year) => (
-                                <ListBoxItem key={year} id={Number(year)}>
-                                    {year}
-                                </ListBoxItem>
-                            ))}
-                        </Select>
-                    </div>
-
+                    <MonthSelect />
                     {!isSameAsCurrentDate && (
                         <Button
                             onPress={() => {

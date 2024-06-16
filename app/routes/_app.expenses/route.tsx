@@ -72,10 +72,7 @@ export default function ExpensesPage() {
             <main className="flex flex-1 flex-col">
                 <div className="m-4 flex min-h-0 flex-1 flex-col rounded border border-stone-300 bg-white px-0 shadow-sm sm:mx-0">
                     <div className="flex items-center justify-between gap-4 border-b border-stone-200 p-4">
-                        <p className="text-sm font-medium">Expenses this month</p>
-                        <div className="ml-auto">
-                            <ExpenseFilterDropdown />
-                        </div>
+                        <ExpenseFilterDropdown />
                         <div className="block sm:hidden">
                             <AddExpenseModal />
                         </div>
