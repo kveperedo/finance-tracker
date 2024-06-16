@@ -78,7 +78,7 @@ export default function MonthlySavingsPanel(props: Pick<AccordionPanelProps, 'is
                     </div>
 
                     <div className="flex justify-evenly p-4 pt-0">
-                        <div className="ml-8">
+                        <div className="flex flex-col justify-between">
                             <p className="text-sm text-stone-600">Monthly savings</p>
                             <p className="text-lg font-bold">
                                 <span className="text-sm font-light">PHP </span>
