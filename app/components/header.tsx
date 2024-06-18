@@ -17,7 +17,7 @@ export default function Header() {
                         className={({ isActive }) =>
                             cn('text-sm text-stone-500', isActive && 'font-semibold text-stone-800')
                         }
-                        to="/expenses"
+                        to="/expenses/summary"
                         prefetch="intent"
                     >
                         Expenses

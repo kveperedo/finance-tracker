@@ -21,6 +21,7 @@ function MonthSelect() {
                 <Button
                     variant="outline"
                     size="icon-sm"
+                    className="text-stone-600"
                     onPress={() => actions.setParam('year', String(currentYear - 1))}
                 >
                     <ChevronLeft />
@@ -33,6 +34,7 @@ function MonthSelect() {
                 <Button
                     variant="outline"
                     size="icon-sm"
+                    className="text-stone-600"
                     onPress={() => actions.setParam('year', String(currentYear + 1))}
                 >
                     <ChevronRight />

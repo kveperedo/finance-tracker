@@ -206,11 +206,11 @@ const ExpensesList = forwardRef<HTMLDivElement>((_props, ref) => {
             items={expenses}
             selectionBehavior="toggle"
             renderEmptyState={() => {
-                if (search) {
-                    return <EmptySearchExpenses />;
-                }
-
-                return <EmptyExpenses />;
+                return (
+                    <div className="m-4 flex flex-1 flex-col items-center justify-center gap-1 text-center">
+                        {search ? <EmptySearchExpenses /> : <EmptyExpenses />}
+                    </div>
+                );
             }}
         >
             {(expense) => {
