@@ -114,34 +114,13 @@ export default function ExpenseForm({
                         />
                     )}
                 />
-                <Controller
-                    control={control}
-                    name="amount"
-                    render={({ field, fieldState: { error } }) => {
-                        return (
-                            <NumberField
-                                autoFocus={autoFocus}
-                                label="Amount"
-                                {...field}
-                                ref={(node) => {
-                                    field.ref(node);
-                                    numberFieldRef.current = node;
-                                }}
-                                onChange={(value) => {
-                                    field.onChange(isNaN(value) ? 0 : value);
-                                }}
-                                isInvalid={!!error?.message}
-                                errorMessage={error?.message}
-                            />
-                        );
-                    }}
-                />
 
                 <Controller
                     control={control}
                     name="category"
                     render={({ field, fieldState: { error } }) => (
                         <Select
+                            autoFocus={autoFocus}
                             label="Category"
                             placeholder="Select a category"
                             items={expenseCategories}
@@ -181,6 +160,29 @@ export default function ExpenseForm({
                             }}
                         </Select>
                     )}
+                />
+
+                <Controller
+                    control={control}
+                    name="amount"
+                    render={({ field, fieldState: { error } }) => {
+                        return (
+                            <NumberField
+                                // autoFocus={autoFocus}
+                                label="Amount"
+                                {...field}
+                                ref={(node) => {
+                                    field.ref(node);
+                                    numberFieldRef.current = node;
+                                }}
+                                onChange={(value) => {
+                                    field.onChange(isNaN(value) ? 0 : value);
+                                }}
+                                isInvalid={!!error?.message}
+                                errorMessage={error?.message}
+                            />
+                        );
+                    }}
                 />
 
                 <Controller

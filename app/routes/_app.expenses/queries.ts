@@ -1,19 +1,10 @@
-import { and, between, desc, eq, ilike, sum } from 'drizzle-orm';
+import { and, between, desc, eq, ilike } from 'drizzle-orm';
 import db from '~/db';
 import { expenses, userDetails } from '~/db/schema';
-import { startOfMonth, endOfMonth, sub, add } from 'date-fns';
+import { sub, add } from 'date-fns';
 import type { WithUserId } from '~/auth/types';
-import { getMonth, getYear } from '~/utils';
-
-const getDate = (month: number, year: number) => new Date(year, month - 1);
-
-function getFirstAndEndOfMonth({ month = getMonth(), year = getYear() }: Omit<ExpenseParams, 'userId'>) {
-    const date = getDate(month, year);
-    const startDate = startOfMonth(date);
-    const endDate = endOfMonth(date);
-
-    return { startDate, endDate };
-}
+import { getDate, getFirstAndEndOfMonth, getMonth, getYear } from '~/utils';
+import { getMonthlyExpenses } from '../resources.expenses/queries';
 
 export type ExpenseParams = WithUserId<{
     month?: number;
@@ -45,23 +36,6 @@ export function getExpenses({ userId, month, year, search }: ExpenseParams) {
 }
 
 export type GetExpensesReturnType = Awaited<ReturnType<typeof getExpenses>>;
-
-export async function getMonthlyExpenses({ userId, month, year }: ExpenseParams) {
-    const { startDate, endDate } = getFirstAndEndOfMonth({ month, year });
-
-    const [result] = await db
-        .select({
-            total: sum(expenses.amount),
-        })
-        .from(expenses)
-        .where(and(eq(expenses.userId, userId), between(expenses.createdAt, startDate, endDate)));
-
-    if (!result) {
-        return 0;
-    }
-
-    return result.total ? parseFloat(result.total) : 0;
-}
 
 export async function getUserRole(userId: string) {
     const [result] = await db

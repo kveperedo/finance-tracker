@@ -1,7 +1,7 @@
 import { parseDateTime } from '@internationalized/date';
 import type { FetcherWithComponents } from '@remix-run/react';
 import { clsx, type ClassValue } from 'clsx';
-import { format } from 'date-fns';
+import { endOfMonth, format, startOfMonth } from 'date-fns';
 import type { DateValue } from 'react-aria-components';
 import { composeRenderProps } from 'react-aria-components';
 import { twMerge } from 'tailwind-merge';
@@ -76,3 +76,13 @@ export const isDateMatchingSearchParams = (date: string, searchParams: { month: 
 
     return searchParams.month === month && searchParams.year === year;
 };
+
+export const getDate = (month: number, year: number) => new Date(year, month - 1);
+
+export function getFirstAndEndOfMonth({ month = getMonth(), year = getYear() }: { month?: number; year?: number }) {
+    const date = getDate(month, year);
+    const startDate = startOfMonth(date);
+    const endDate = endOfMonth(date);
+
+    return { startDate, endDate };
+}
