@@ -11,12 +11,14 @@ const categoryMap = keyBy(expenseCategories, 'value');
 
 export default function CategoryTag({ category }: CategoryTagProps) {
     const { Icon } = categoryMap[category]!;
+    const { bg, text } = getTagColors(category);
 
     return (
         <span
             className={cn(
                 'flex h-8 w-8 items-center gap-1 rounded-full px-2 py-1 text-xs font-medium',
-                getTagColors(category)
+                bg.default,
+                text.default
             )}
         >
             <Icon size={16} />

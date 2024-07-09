@@ -7,10 +7,7 @@ import { useLoaderData } from '@remix-run/react';
 import type { MonthKey } from '../_app.expenses/constants';
 import { MONTHS } from '../_app.expenses/constants';
 import useExpenseSearchParams from '../_app.expenses/hooks/useExpenseSearchParams';
-import { keyBy } from 'lodash-es';
-import { expenseCategories, getTagColors } from '../resources.expenses/constants';
-
-const categoryMap = keyBy(expenseCategories, 'value');
+import { CategoryToggles } from './category-toggles';
 
 export async function loader({ request }: LoaderFunctionArgs) {
     const userId = await requireUserId(request);
@@ -33,27 +30,12 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export default function ExpensesSummaryPage() {
-    const { yearlyExpenses, expensesByCategory } = useLoaderData<typeof loader>();
+    const { yearlyExpenses } = useLoaderData<typeof loader>();
     const [{ month }] = useExpenseSearchParams();
 
     return (
         <div className="my-4 flex flex-1 flex-col gap-4">
-            <div className="flex items-center justify-between divide-x divide-stone-200 rounded border border-stone-300 bg-white shadow-sm">
-                {expensesByCategory.map(({ total, category }) => {
-                    const { label } = categoryMap[category]!;
-                    const tagColors = getTagColors(category);
-
-                    return (
-                        <div key={category} className="flex flex-1 flex-col items-center gap-1 px-2 py-4">
-                            <p className={cn('rounded p-1 px-2 text-center text-sm', tagColors)}>{label}</p>
-                            <p className={cn('flex items-baseline gap-1 rounded text-sm font-semibold')}>
-                                <span className="text-xs font-normal">PHP</span>
-                                {numberFormatter.format(total)}
-                            </p>
-                        </div>
-                    );
-                })}
-            </div>
+            <CategoryToggles />
             <div className="flex flex-1 flex-col rounded border border-stone-300 bg-white shadow-sm">
                 <div className="border-b border-stone-200 p-4">
                     <p className="text-sm font-medium">Yearly Expenses</p>
