@@ -23,11 +23,12 @@ export default function ProgressBar() {
             role="progressbar"
             aria-hidden={!active}
             aria-valuetext={active ? 'Loading' : undefined}
-            className="fixed inset-x-0 left-0 top-0 z-50 h-1 animate-pulse">
+            className="fixed inset-x-0 left-0 top-0 z-50 h-1 animate-pulse"
+        >
             <div
                 ref={ref}
                 className={cn(
-                    'h-full bg-gradient-to-r from-purple-700 to-pink-700 transition-all duration-500 ease-in-out',
+                    'h-full bg-gradient-to-r from-sky-500 to-sky-600 transition-all duration-500 ease-in-out',
                     navigation.state === 'idle' && animationComplete && 'w-0 opacity-0 transition-none',
                     navigation.state === 'submitting' && 'w-4/12',
                     navigation.state === 'loading' && 'w-10/12',
