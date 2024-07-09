@@ -124,14 +124,18 @@ export default function ExpenseForm({
                             label="Category"
                             placeholder="Select a category"
                             items={expenseCategories}
-                            renderValue={({ label, Icon }) => (
-                                <span className="flex items-center gap-3">
-                                    <span className={cn(field.value && getTagColors(field.value), 'bg-transparent')}>
-                                        <Icon size={16} />
+                            renderValue={({ label, Icon }) => {
+                                const { text } = getTagColors(field.value);
+
+                                return (
+                                    <span className="flex items-center gap-3">
+                                        <span className={cn(field.value && text.default)}>
+                                            <Icon size={16} />
+                                        </span>
+                                        {label}
                                     </span>
-                                    {label}
-                                </span>
-                            )}
+                                );
+                            }}
                             {...field}
                             selectedKey={field.value}
                             onSelectionChange={(item) => field.onChange(item)}
@@ -140,19 +144,13 @@ export default function ExpenseForm({
                         >
                             {(item) => {
                                 const { Icon } = item;
+                                const { text } = getTagColors(item.value);
 
                                 return (
                                     <ListBoxItem
                                         id={item.value}
                                         textValue={item.value}
-                                        icon={
-                                            <Icon
-                                                className={cn(
-                                                    getTagColors(item.value),
-                                                    'h-[inherit] w-[inherit] bg-transparent'
-                                                )}
-                                            />
-                                        }
+                                        icon={<Icon className={cn(text.default, 'h-[inherit] w-[inherit]')} />}
                                     >
                                         {item.label}
                                     </ListBoxItem>

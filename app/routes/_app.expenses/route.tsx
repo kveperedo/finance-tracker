@@ -14,6 +14,7 @@ import { userPreferencesCookie } from '../resources.user-preferences/cookie.serv
 import type { UserPreferences } from '../resources.user-preferences/schema';
 import { getMonthlyExpenses } from '../resources.expenses/queries';
 import { useBreakpoint } from '~/hooks/useBreakpoint';
+import type { Expense } from '~/db/types';
 
 export const meta: MetaFunction = ({ location }) => {
     const searchParams = new URLSearchParams(location.search);
@@ -42,12 +43,14 @@ export async function loader({ request }: LoaderFunctionArgs) {
     const month = searchParams.get('month');
     const year = searchParams.get('year');
     const search = searchParams.get('q');
+    const category = searchParams.get('category') as Expense['category'] | null;
 
     const params: ExpenseParams = {
         userId,
         month: month ? Number(month) : undefined,
         year: year ? Number(year) : undefined,
         search: search ?? undefined,
+        category: category ?? undefined,
     };
 
     const [expenses, monthlyExpenses, monthlyIncome, userRole, savingsSummary] = await Promise.all([

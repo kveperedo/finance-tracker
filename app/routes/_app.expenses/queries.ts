@@ -5,14 +5,16 @@ import { sub, add } from 'date-fns';
 import type { WithUserId } from '~/auth/types';
 import { getDate, getFirstAndEndOfMonth, getMonth, getYear } from '~/utils';
 import { getMonthlyExpenses } from '../resources.expenses/queries';
+import type { Expense } from '~/db/types';
 
 export type ExpenseParams = WithUserId<{
     month?: number;
     year?: number;
     search?: string;
+    category?: Expense['category'];
 }>;
 
-export function getExpenses({ userId, month, year, search }: ExpenseParams) {
+export function getExpenses({ userId, month, year, search, category }: ExpenseParams) {
     const { startDate, endDate } = getFirstAndEndOfMonth({ month, year });
 
     return db
@@ -29,7 +31,8 @@ export function getExpenses({ userId, month, year, search }: ExpenseParams) {
             and(
                 eq(expenses.userId, userId),
                 between(expenses.updatedAt, startDate, endDate),
-                search ? ilike(expenses.description, `%${search}%`) : undefined
+                search ? ilike(expenses.description, `%${search}%`) : undefined,
+                category ? eq(expenses.category, category) : undefined
             )
         )
         .orderBy(desc(expenses.updatedAt));
