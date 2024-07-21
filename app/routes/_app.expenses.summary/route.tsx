@@ -1,5 +1,5 @@
 import type { LoaderFunctionArgs } from '@vercel/remix';
-import { Bar, BarChart, CartesianGrid, Cell, LabelList, ResponsiveContainer, Text, XAxis } from 'recharts';
+import { Bar, BarChart, Cell, LabelList, ResponsiveContainer, Text, XAxis } from 'recharts';
 import { requireUserId } from '~/auth/session.server';
 import { cn, numberFormatter } from '~/utils';
 import { getTotalExpensesByCategory, getYearlyExpenses } from './queries';
@@ -43,7 +43,6 @@ export default function ExpensesSummaryPage() {
                 <div className="flex-1 p-4">
                     <ResponsiveContainer width="100%" height="100%">
                         <BarChart margin={{ top: 16 }} data={yearlyExpenses}>
-                            <CartesianGrid className="stroke-stone-100" vertical={false} />
                             <XAxis
                                 dataKey={({ month }) => `${MONTHS[month as MonthKey]}`}
                                 axisLine={false}
@@ -58,7 +57,7 @@ export default function ExpensesSummaryPage() {
                                 tickMargin={12}
                                 interval={0}
                             />
-                            <Bar barSize={64} dataKey="total">
+                            <Bar barSize={64} dataKey="total" radius={4}>
                                 {yearlyExpenses.map((expense) => {
                                     const isCurrentMonth = expense.month === month;
 
