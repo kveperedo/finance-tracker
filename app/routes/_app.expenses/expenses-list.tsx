@@ -98,11 +98,11 @@ function ExpenseItem({ expense, spring, springRef }: ExpenseItemProps) {
     return (
         <GridListItem
             ref={containerRef}
-            className={({ isFocused }) => cn('border-b border-stone-100', isFocused && 'outline-none')}
+            className="group border-b border-stone-100 focus:border-stone-200 focus:outline-none"
             textValue={expense.description}
         >
             <div className="relative flex h-14 w-full items-center justify-between bg-stone-50">
-                <div className="ml-auto flex items-center gap-2 px-4">
+                <div className="ml-auto flex items-center gap-2 px-4 sm:hidden">
                     <Button
                         variant="outline"
                         className="rounded-full"
@@ -123,7 +123,7 @@ function ExpenseItem({ expense, spring, springRef }: ExpenseItemProps) {
                 <animated.div
                     {...bind()}
                     className={cn(
-                        'absolute flex h-full w-full touch-pan-y items-center justify-between bg-white px-4',
+                        'absolute flex h-full w-full touch-pan-y items-center justify-between bg-white px-4 group-focus:bg-stone-50',
                         expense.isPending && 'bg-stone-100'
                     )}
                     style={{ x: spring.x }}
@@ -204,7 +204,7 @@ const ExpensesList = forwardRef<HTMLDivElement>((_props, ref) => {
             ref={ref}
             className="flex flex-1 flex-col overflow-auto"
             items={expenses}
-            selectionBehavior="toggle"
+            selectionMode="none"
             renderEmptyState={() => {
                 return (
                     <div className="m-4 flex flex-1 flex-col items-center justify-center gap-1 text-center">
