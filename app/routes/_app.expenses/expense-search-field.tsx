@@ -14,6 +14,11 @@ export default function ExpenseSearchField() {
             aria-label="Search expenses"
             className="group relative flex max-w-60 flex-1 items-center"
             defaultValue={search}
+            onChange={(value) => {
+                if (value.length === 0) {
+                    actions.deleteParam('q');
+                }
+            }}
             onSubmit={(newSearch) => {
                 actions.setParam('q', newSearch.toLowerCase());
             }}
