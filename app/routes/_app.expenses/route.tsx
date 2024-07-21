@@ -92,7 +92,7 @@ export default function ExpensesPage() {
                 <div className="flex items-center justify-between gap-4 border-t border-stone-200 p-4">
                     <ExpenseSearchField />
 
-                    <p className="flex items-baseline gap-1 text-xl font-bold">
+                    <p className="flex items-baseline gap-1 text-lg font-bold">
                         <span className="font-serif text-sm font-light">PHP</span>
                         {numberFormatter.format(monthlyExpenses)}
                     </p>
