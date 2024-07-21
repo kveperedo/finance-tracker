@@ -43,6 +43,12 @@ const CategoryToggle = ({ category, total, isSelected, onChange }: CategoryToggl
                     case 'ArrowLeft':
                         focusManager?.focusPrevious({ wrap: true });
                         break;
+                    case 'Tab':
+                        if (e.shiftKey) {
+                            focusManager?.focusFirst();
+                        } else {
+                            focusManager?.focusLast();
+                        }
                 }
             }}
             onChange={(isSelected) => {
@@ -54,11 +60,25 @@ const CategoryToggle = ({ category, total, isSelected, onChange }: CategoryToggl
                 onChange(isSelected);
             }}
         >
-            <p className={cn('rounded px-2 py-1 text-center text-sm', bg.default, text.default)}>{label}</p>
-            <p className={cn('flex items-baseline gap-1 rounded text-sm font-semibold')}>
-                <span className="text-xs font-normal">PHP</span>
-                {numberFormatter.format(total)}
-            </p>
+            {({ isPressed }) => (
+                <>
+                    <p
+                        className={cn(
+                            'rounded px-2 py-1 text-center text-sm',
+                            bg.default,
+                            text.default,
+                            isSelected && 'bg-transparent text-white',
+                            isPressed && 'bg-transparent'
+                        )}
+                    >
+                        {label}
+                    </p>
+                    <p className={cn('flex items-baseline gap-1 rounded text-sm font-semibold')}>
+                        <span className="text-xs font-normal">PHP</span>
+                        {numberFormatter.format(total)}
+                    </p>
+                </>
+            )}
         </AriaToggleButton>
     );
 };

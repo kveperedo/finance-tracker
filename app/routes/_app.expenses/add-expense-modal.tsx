@@ -16,8 +16,9 @@ export default function AddExpenseModal() {
 
     return (
         <DialogTrigger isOpen={isOpen} onOpenChange={setIsOpen}>
-            <Button size="icon">
+            <Button>
                 <Plus size={16} />
+                Add Expense
             </Button>
             <Modal title="Add Expense">
                 <ExpenseForm fetcher={fetcher} autoFocus onSubmitSuccess={handleSubmitSuccess}>

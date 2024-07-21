@@ -5,11 +5,61 @@ import { MONTHS, SHORT_MONTHS } from './constants';
 import { ChevronLeft, ChevronRight, ChevronsUpDown, CircleX, FilterX } from 'lucide-react';
 import Popover from '~/components/popover';
 import Button from '~/components/button';
+import type { PropsWithChildren } from 'react';
 import { useRef, useState } from 'react';
 import useExpenseSearchParams from './hooks/useExpenseSearchParams';
 import { cn, getMonth } from '~/utils';
 import { getYear } from 'date-fns';
 import { chunk } from 'lodash-es';
+import { FocusScope, useFocusManager } from 'react-aria';
+
+type MonthButtonProps = PropsWithChildren<{
+    onPress: () => void;
+    isCurrentMonth: boolean;
+}>;
+
+function MonthButton({ onPress, isCurrentMonth, children }: MonthButtonProps) {
+    const focusManager = useFocusManager();
+
+    return (
+        <Button
+            onPress={onPress}
+            autoFocus={isCurrentMonth}
+            onKeyDown={(event) => {
+                switch (event.key) {
+                    case 'ArrowRight':
+                        focusManager?.focusNext({ wrap: true });
+                        break;
+                    case 'ArrowDown':
+                        focusManager?.focusNext({ wrap: true });
+                        focusManager?.focusNext({ wrap: true });
+                        focusManager?.focusNext({ wrap: true });
+                        break;
+                    case 'ArrowLeft':
+                        focusManager?.focusPrevious({ wrap: true });
+                        break;
+                    case 'ArrowUp':
+                        focusManager?.focusPrevious({ wrap: true });
+                        focusManager?.focusPrevious({ wrap: true });
+                        focusManager?.focusPrevious({ wrap: true });
+                        break;
+                    case 'Tab':
+                        if (event.shiftKey) {
+                            focusManager?.focusFirst();
+                        } else {
+                            focusManager?.focusLast();
+                        }
+                        break;
+                }
+            }}
+            size="sm"
+            variant={isCurrentMonth ? 'primary' : 'tertiary'}
+            className={cn('flex-1', isCurrentMonth && 'shadow-sm')}
+        >
+            {children}
+        </Button>
+    );
+}
 
 function MonthSelect() {
     const [{ month: currentMonth, year: currentYear }, actions] = useExpenseSearchParams();
@@ -27,9 +77,7 @@ function MonthSelect() {
                     <ChevronLeft />
                 </Button>
 
-                <p className="text-sm">
-                    {MONTHS[currentMonth as MonthKey]} {currentYear}
-                </p>
+                <p className="text-sm">{currentYear}</p>
 
                 <Button
                     variant="outline"
@@ -41,29 +89,27 @@ function MonthSelect() {
                 </Button>
             </div>
 
-            <div className="flex flex-col gap-2">
-                {chunkedMonths.map((months, index) => (
-                    <div key={index} className="flex gap-2">
-                        {months.map(([key, value]) => {
-                            const isCurrentMonth = currentMonth === Number(key);
+            <FocusScope>
+                <div className="flex flex-col gap-2">
+                    {chunkedMonths.map((months, index) => (
+                        <div key={index} className="flex gap-2">
+                            {months.map(([key, value]) => {
+                                const isCurrentMonth = currentMonth === Number(key);
 
-                            return (
-                                <Button
-                                    key={key}
-                                    onPress={() => {
-                                        actions.setParam('month', key);
-                                    }}
-                                    size="sm"
-                                    variant={isCurrentMonth ? 'primary' : 'tertiary'}
-                                    className={cn('flex-1', isCurrentMonth && 'shadow-sm')}
-                                >
-                                    {value}
-                                </Button>
-                            );
-                        })}
-                    </div>
-                ))}
-            </div>
+                                return (
+                                    <MonthButton
+                                        key={key}
+                                        onPress={() => actions.setParam('month', key)}
+                                        isCurrentMonth={isCurrentMonth}
+                                    >
+                                        {value}
+                                    </MonthButton>
+                                );
+                            })}
+                        </div>
+                    ))}
+                </div>
+            </FocusScope>
         </div>
     );
 }
@@ -101,7 +147,7 @@ export default function ExpenseFilterDropdown() {
                     )
                 }
             >
-                {MONTHS[currentMonth as MonthKey]} {currentYear} Expenses
+                {MONTHS[currentMonth as MonthKey]} {currentYear}
             </Button>
             <Popover
                 placement="bottom left"

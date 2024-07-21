@@ -1,4 +1,4 @@
-import { Outlet, useLoaderData } from '@remix-run/react';
+import { Outlet, useLoaderData, useRevalidator } from '@remix-run/react';
 import type { ExpenseParams } from './queries';
 import { getExpenses, getSavingsSummary, getUserMonthlyIncome, getUserRole } from './queries';
 import AddExpenseModal from './add-expense-modal';
@@ -15,6 +15,7 @@ import type { UserPreferences } from '../resources.user-preferences/schema';
 import { getMonthlyExpenses } from '../resources.expenses/queries';
 import { useBreakpoint } from '~/hooks/useBreakpoint';
 import type { Expense } from '~/db/types';
+import { useEffect } from 'react';
 
 export const meta: MetaFunction = ({ location }) => {
     const searchParams = new URLSearchParams(location.search);
@@ -67,6 +68,16 @@ export async function loader({ request }: LoaderFunctionArgs) {
 export default function ExpensesPage() {
     const { monthlyExpenses } = useLoaderData<typeof loader>();
     const { isSm } = useBreakpoint('sm');
+    const revalidator = useRevalidator();
+
+    useEffect(() => {
+        const onWindowFocus = () => {
+            revalidator.revalidate();
+        };
+
+        window.addEventListener('focus', onWindowFocus);
+        return () => window.removeEventListener('focus', onWindowFocus);
+    }, [revalidator]);
 
     return (
         <div className="container mx-auto flex min-h-0 w-full flex-1 gap-4">
@@ -81,7 +92,7 @@ export default function ExpensesPage() {
                 <div className="flex items-center justify-between gap-4 border-t border-stone-200 p-4">
                     <ExpenseSearchField />
 
-                    <p className="flex items-baseline gap-1 text-xl font-bold">
+                    <p className="flex items-baseline gap-1 text-lg font-bold">
                         <span className="font-serif text-sm font-light">PHP</span>
                         {numberFormatter.format(monthlyExpenses)}
                     </p>
