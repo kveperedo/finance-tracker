@@ -43,6 +43,12 @@ const CategoryToggle = ({ category, total, isSelected, onChange }: CategoryToggl
                     case 'ArrowLeft':
                         focusManager?.focusPrevious({ wrap: true });
                         break;
+                    case 'Tab':
+                        if (e.shiftKey) {
+                            focusManager?.focusFirst();
+                        } else {
+                            focusManager?.focusLast();
+                        }
                 }
             }}
             onChange={(isSelected) => {
