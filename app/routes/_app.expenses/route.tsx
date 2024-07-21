@@ -1,4 +1,4 @@
-import { Outlet, useLoaderData } from '@remix-run/react';
+import { Outlet, useLoaderData, useRevalidator } from '@remix-run/react';
 import type { ExpenseParams } from './queries';
 import { getExpenses, getSavingsSummary, getUserMonthlyIncome, getUserRole } from './queries';
 import AddExpenseModal from './add-expense-modal';
@@ -15,6 +15,7 @@ import type { UserPreferences } from '../resources.user-preferences/schema';
 import { getMonthlyExpenses } from '../resources.expenses/queries';
 import { useBreakpoint } from '~/hooks/useBreakpoint';
 import type { Expense } from '~/db/types';
+import { useEffect } from 'react';
 
 export const meta: MetaFunction = ({ location }) => {
     const searchParams = new URLSearchParams(location.search);
@@ -67,6 +68,16 @@ export async function loader({ request }: LoaderFunctionArgs) {
 export default function ExpensesPage() {
     const { monthlyExpenses } = useLoaderData<typeof loader>();
     const { isSm } = useBreakpoint('sm');
+    const revalidator = useRevalidator();
+
+    useEffect(() => {
+        const onWindowFocus = () => {
+            revalidator.revalidate();
+        };
+
+        window.addEventListener('focus', onWindowFocus);
+        return () => window.removeEventListener('focus', onWindowFocus);
+    }, [revalidator]);
 
     return (
         <div className="container mx-auto flex min-h-0 w-full flex-1 gap-4">
